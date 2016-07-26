@@ -1,4 +1,4 @@
-package httpc.sockets
+package httpc.tcp
 
 import java.io.IOException
 import cats.Show

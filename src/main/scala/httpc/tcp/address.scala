@@ -1,9 +1,9 @@
-package httpc.sockets
+package httpc.tcp
 
 import java.net.InetAddress
 
 /** An Internet address */
-case class Address private[sockets](inet: InetAddress)
+case class Address private[tcp](inet: InetAddress)
 
 case class Port private(number: Int)
 

@@ -1,16 +1,16 @@
-package httpc.sockets.unsafe
+package httpc.tcp.sockets
 
 import java.io.{IOException, InputStream, OutputStream}
 import cats.data.Xor
 import java.net.{InetAddress, UnknownHostException, Socket ⇒ JSocket}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.NonNegative
-import httpc.sockets.{Address, Port, SocketError}
+import httpc.tcp.{Address, Port, SocketError}
 import SocketError._
 
 
 /** A TCP socket */
-case class Socket private[unsafe](socket: JSocket, in: InputStream, out: OutputStream) {
+case class Socket private[sockets](socket: JSocket, in: InputStream, out: OutputStream) {
 
    /** Disconnects the given socket and frees its allocated system resources */
   def disconnect(): SocketError Xor Unit =
