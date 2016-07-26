@@ -1,11 +1,11 @@
-package httpc.sockets.unsafe
+package httpc.sockets
 
 import java.io.IOException
 import cats.Show
 import cats.data.Xor
 
-sealed trait SocketError
 
+sealed trait SocketError
 
 object SocketError {
 

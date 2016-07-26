@@ -2,10 +2,12 @@ package httpc.sockets.unsafe
 
 import java.io.{IOException, InputStream, OutputStream}
 import cats.data.Xor
-import java.net.{Socket ⇒ JSocket}
+import java.net.{InetAddress, UnknownHostException, Socket ⇒ JSocket}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.NonNegative
-import SocketError.catchIoException
+import httpc.sockets.{Address, Port, SocketError}
+import SocketError._
+
 
 /** A TCP socket */
 case class Socket private[unsafe](socket: JSocket, in: InputStream, out: OutputStream) {
@@ -38,4 +40,14 @@ object Socket {
       val js = new JSocket(address.inet, port.number)
       Socket(js, js.getInputStream, js.getOutputStream)
     }
+}
+
+object Addresses {
+
+  /** Looks up an Address by a hostname */
+  def lookup(hostname: String): SocketError Xor Address =
+  Xor.catchNonFatal(Address(InetAddress.getByName(hostname))) leftMap {
+    case t: UnknownHostException ⇒ SocketError.UnknownHost(hostname)
+    case t: SecurityException ⇒ SocketError.NotAllowed(t.getMessage)
+  }
 }
