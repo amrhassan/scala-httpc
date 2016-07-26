@@ -11,3 +11,5 @@ object Port {
   def fromInt(value: Int): Option[Port] =
     if (value >= 0 && value <= 65535) Some(Port(value)) else None
 }
+
+case class ConnectionId(id: Int)
