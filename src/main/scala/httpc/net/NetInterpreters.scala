@@ -8,7 +8,7 @@ import httpc.net.NetError.ConnectionNotFound
 
 
 /** Interpreters for network communication */
-object Interpreters {
+object NetInterpreters {
 
   /** Interpreter for TCP language using OS sockets */
   def socketsInterpreter(implicit ec: ExecutionContext): NetIo.Interpreter = new NetIo.Interpreter {

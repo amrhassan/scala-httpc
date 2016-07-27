@@ -10,6 +10,15 @@ object Header {
   /** Renders a Header into bytes */
   def render(header: Header): Vector[Byte] =
     s"${header.name}: ${header.value}".getBytes.toVector
+
+  /** Reads a Header from a sequence of bytes */
+  def read(bytes: Vector[Byte]): Option[Header] = {
+    val line = new String(bytes.toArray)
+    if (line contains ':') {
+      val (key, value) = line.splitAt(line.indexOf(':'))
+      Some(Header(key.trim, value.drop(1).trim))
+    } else None
+  }
 }
 
 /** An HTTP message */
@@ -64,4 +73,4 @@ object Request {
 }
 
 /** An HTTP response */
-case class Response(data: Array[Byte])
+case class Response(status: Array[Byte], headers: List[Header], body: Array[Byte])
