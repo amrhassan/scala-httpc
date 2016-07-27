@@ -8,6 +8,7 @@ import httpc.net.{ConnectionId, NetIo, Port}
 
 object HttpIo {
 
+
   def run[A](command: HttpIo[A], netInt: NetIo.Interpreter, ec: ExecutionContext): XorT[Future, HttpError, A] =
     command.run(netInt)
 
@@ -19,19 +20,25 @@ object HttpIo {
   def pure[A](a: A): HttpIo[A] =
     Kleisli(_ ⇒ XorT(Future.successful(Xor.right(a))))
 
-  def fromXor[A](fa: HttpError Xor A): HttpIo[A] =
+  def error[A](e: HttpError): HttpIo[A] =
+    Kleisli(_ ⇒ XorT(Future.successful(Xor.left(e))))
+
+  def xor[A](fa: HttpError Xor A): HttpIo[A] =
     Kleisli(_ ⇒ XorT(Future.successful(fa)))
 
-  def request(hostname: String, r: Request, port: Port = HttpPort)(implicit ec: ExecutionContext): HttpIo[Response] =
+  def executeHttp(hostname: String, r: Request, port: Port)(implicit ec: ExecutionContext): HttpIo[Response] =
     for {
       address ← fromNetIo(NetIo.lookupAddress(hostname))
       con ← fromNetIo(NetIo.connect(address, port))
       _ ← fromNetIo(NetIo.write(con, Request.render(r).toArray))
-      status ← readLine(con)
+      status ← readStatus(con)
       headers ← readHeaders(con)
-    } yield Response(status.toArray, headers, Array.empty)
+    } yield Response(status, headers, Array.empty)
 
-  private def readHeaders(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[List[Header]] =
+  private def readHeaders(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[List[Header]] = {
+    def readHeader(line: Vector[Byte]): HttpIo[Header] = HttpIo.xor {
+      Header.read(line).toRightXor(HttpError.MalformedHeader(new String(line.toArray).trim))
+    }
     readLine(con) >>= { line ⇒
       if (Bytes.isWhitespace(line)) {
         HttpIo.pure(List.empty)
@@ -41,10 +48,14 @@ object HttpIo {
         }
       }
     }
-
-  private def readHeader(line: Vector[Byte]): HttpIo[Header] = HttpIo.fromXor {
-    Header.read(line).toRightXor(HttpError.MalformedHeader(new String(line.toArray).trim))
   }
+
+  private def readStatus(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[Status] =
+    readLine(con) >>= { line ⇒
+      val parts = Bytes.split(line, ' '.toByte)
+      val status = Status.read(parts(1)).toRightXor(HttpError.MalformedStatus(Bytes.toString(line).trim))
+      HttpIo.xor(status)
+    }
 
   private def readLine(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[Vector[Byte]] = HttpIo.fromNetIo {
     NetIo.readUntil(con, '\n'.toByte)

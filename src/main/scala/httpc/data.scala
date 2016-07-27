@@ -1,5 +1,6 @@
 package httpc
 
+import cats.data.Xor
 import cats.implicits._
 
 /** An HTTP header */
@@ -66,11 +67,18 @@ object Request {
 
   private val space = ' '.toByte
   private val newline = '\n'.toByte
-  private val http = "HTTP/1.1".getBytes.toVector
 
   def render(r: Request): Vector[Byte] =
-    Method.render(r.method) :+ space |+| Path.render(r.path) :+ space |+| http :+ newline |+| Message.render(r.message)
+    Method.render(r.method) :+ space |+| Path.render(r.path) :+ space |+|
+      Http.Version :+ newline |+| Message.render(r.message)
+}
+
+case class Status(value: Int)
+
+object Status {
+  def read(bytes: Vector[Byte]): Option[Status] =
+    Xor.catchNonFatal(Bytes.toString(bytes).toInt).toOption map Status.apply
 }
 
 /** An HTTP response */
-case class Response(status: Array[Byte], headers: List[Header], body: Array[Byte])
+case class Response(status: Status, headers: List[Header], body: Array[Byte])
