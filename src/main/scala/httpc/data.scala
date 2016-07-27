@@ -63,5 +63,5 @@ object Request {
     Method.render(r.method) :+ space |+| Path.render(r.path) :+ space |+| http :+ newline |+| Message.render(r.message)
 }
 
-///** An HTTP response */
-//case class Response(message: Message)
+/** An HTTP response */
+case class Response(data: Array[Byte])

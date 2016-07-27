@@ -1,21 +1,21 @@
-package httpc.tcp
+package httpc.net
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.XorT
-import httpc.tcp.sockets.{Addresses, Socket, SocketError}
+import httpc.net.sockets.{Addresses, Socket, SocketError}
 import cats.implicits._
-import httpc.tcp.TcpError.ConnectionNotFound
+import httpc.net.NetError.ConnectionNotFound
 
 
-/** Interpreters for TCP communication */
+/** Interpreters for network communication */
 object Interpreters {
 
   /** Interpreter for TCP language using OS sockets */
-  def socketsInterpreter(implicit ec: ExecutionContext): TcpNet.Interpreter = new TcpNet.Interpreter {
+  def socketsInterpreter(implicit ec: ExecutionContext): NetIo.Interpreter = new NetIo.Interpreter {
 
     var cons = Map.empty[ConnectionId, Socket]
 
-    def apply[A](fa: TcpNetOp[A]): XorT[Future, TcpError, A] = XorT.fromXor[Future](fa match {
+    def apply[A](fa: NetIoOp[A]): XorT[Future, NetError, A] = XorT.fromXor[Future](fa match {
       case AddrLookup(hostname) ⇒
         Addresses.lookup(hostname) leftMap errorTranslate
       case Connect(address, port) ⇒
@@ -43,9 +43,9 @@ object Interpreters {
     def conId(socket: Socket): ConnectionId =
       ConnectionId(socket.socket.getPort | (socket.socket.getLocalPort << 16))
 
-    def errorTranslate(socketError: SocketError): TcpError = socketError match {
-      case SocketError.UnknownHost(hostname) ⇒ TcpError.HostNotFound(hostname)
-      case e ⇒ TcpError.UnexpectedError(e.show)
+    def errorTranslate(socketError: SocketError): NetError = socketError match {
+      case SocketError.UnknownHost(hostname) ⇒ NetError.HostNotFound(hostname)
+      case e ⇒ NetError.UnexpectedError(e.show)
     }
   }
 }

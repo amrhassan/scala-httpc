@@ -1,11 +1,11 @@
-package httpc.tcp.sockets
+package httpc.net.sockets
 
 import java.io.{InputStream, OutputStream}
 import cats.data.Xor
 import java.net.{InetAddress, UnknownHostException, Socket ⇒ JSocket}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.NonNegative
-import httpc.tcp.{Address, Port}
+import httpc.net.{Address, Port}
 import SocketError._
 
 
