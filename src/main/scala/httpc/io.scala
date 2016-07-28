@@ -8,7 +8,6 @@ import httpc.net.{ConnectionId, NetIo, Port}
 
 object HttpIo {
 
-
   def run[A](command: HttpIo[A], netInt: NetIo.Interpreter, ec: ExecutionContext): XorT[Future, HttpError, A] =
     command.run(netInt)
 
@@ -33,7 +32,17 @@ object HttpIo {
       _ ← fromNetIo(NetIo.write(con, Request.render(r).toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
-    } yield Response(status, headers, Array.empty)
+      bodySize ← bodySizeFromHeaders(headers)
+      body ← fromNetIo(NetIo.read(con, bodySize))
+    } yield Response(status, headers, body.toArray)
+
+  def bodySizeFromHeaders(headers: List[Header]): HttpIo[net.Length] = xor {
+    for {
+      header ← headers.find(_.name == HeaderNames.ContentLength).toRightXor(HttpError.MissingContentLength)
+      value ← Xor.catchNonFatal(header.value.toInt).leftMap(_ ⇒ HttpError.MissingContentLength)
+      size ← net.length(value).toRightXor(HttpError.MissingContentLength)
+    } yield size
+  }
 
   private def readHeaders(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[List[Header]] = {
     def readHeader(line: Vector[Byte]): HttpIo[Header] = HttpIo.xor {
