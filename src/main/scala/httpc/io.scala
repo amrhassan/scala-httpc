@@ -9,7 +9,7 @@ import httpc.net.NetIo
 object HttpIo {
 
   /** Evaluates the given [[HttpIo]] program realizing all its effects */
-  def run[A](command: HttpIo[A], netInt: NetIo.Interpreter, ec: ExecutionContext): XorT[Future, HttpError, A] =
+  def run[A](command: HttpIo[A], netInt: NetIo.Interpreter): XorT[Future, HttpError, A] =
     command.run(netInt)
 
   /** Lifts a [[NetIo]] into an [[HttpIo]] */
