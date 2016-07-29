@@ -1,7 +1,7 @@
 name := "scala-httpc"
 
-organization := "amrhassan.github.io"
-version := "0.1.3"
+organization := "io.github.amrhassan"
+version := "0.1.4"
 scalaVersion := "2.11.8"
 
 val cats = Seq("org.typelevel" %% "cats" % "0.6.0" )
