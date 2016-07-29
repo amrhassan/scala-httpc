@@ -57,12 +57,22 @@ object Method {
   def render(m: Method): Vector[Byte] = (m match {
     case Get ⇒ "GET"
     case Put ⇒ "PUT"
+    case Post ⇒ "POST"
+    case Delete ⇒ "DELETE"
+    case Options ⇒ "OPTIONS"
+    case Trace ⇒ "Trace"
+    case Head ⇒ "HEAD"
   }).getBytes.toVector
 }
 
 object Methods {
   case object Get extends Method
   case object Put extends Method
+  case object Post extends Method
+  case object Delete extends Method
+  case object Options extends Method
+  case object Trace extends Method
+  case object Head extends Method
 }
 
 case class Path(path: String)
