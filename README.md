@@ -18,12 +18,12 @@ import cats.implicits._
 
 object Sandbox extends App {
 
-  get("https://httpbin.org/get") map { response ⇒
+  get("http://httpbin.org/get") map { response ⇒
     println(response.status)
     println(response.text)
   }
 
-  put("https://httpbin.org/put", data = "OK Computer") map { response ⇒
+  put("http://httpbin.org/put", data = "OK Computer") map { response ⇒
     println(response.status)
     println(response.text)
   }
