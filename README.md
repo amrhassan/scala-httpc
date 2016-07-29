@@ -5,7 +5,7 @@
 
 HTTP Client for Scala built using functional programming and [cats](https://github.com/typelevel/cats)
 
-# Usage Example #
+# Usage #
 
 ```
 libraryDependencies += "io.github.amrhassan" %% "httpc" % "0.1.6"
