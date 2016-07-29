@@ -22,6 +22,13 @@ object Header {
   }
 }
 
+object Headers {
+
+  /** Content-Type header */
+  def contentType(value: String): Header =
+    Header(HeaderNames.ContentType, value)
+}
+
 /** An HTTP message */
 case class Message(headers: List[Header], body: Array[Byte])
 
@@ -44,13 +51,17 @@ sealed trait Method
 
 object Method {
 
-  case object Get extends Method
-  case object Put extends Method
+  import Methods._
 
   def render(m: Method): Vector[Byte] = (m match {
     case Get ⇒ "GET"
     case Put ⇒ "PUT"
   }).getBytes.toVector
+}
+
+object Methods {
+  case object Get extends Method
+  case object Put extends Method
 }
 
 case class Path(path: String)

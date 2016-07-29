@@ -19,20 +19,27 @@ object Requests {
       hostname = parsedUrl.getHost
       extraHeaders = List(Header(HeaderNames.Host, hostname))
       address ← fromNetIo(NetIo.lookupAddress(hostname))
-      request = Request(method, Path(parsedUrl.getPath), Message(extraHeaders, implicitly[RequestData[A]].bytes(data)))
+      request = Request(method, Path(parsedUrl.getPath), Message(extraHeaders, implicitly[RequestData[A]].body(data)))
     } yield (address, request, Http.Port)
 }
 
+/** Request content */
 trait RequestData[A] {
-  def bytes(a: A): Array[Byte]
+
+  /** Body of request */
+  def body(a: A): Array[Byte]
+
+  /** Fallback headers in case they are not defined in the request */
+  def fallbackHeaders: List[Header]
 }
 
 object RequestData {
 
-  def apply[A](f: (A ⇒ Array[Byte])): RequestData[A] = new RequestData[A] {
-    def bytes(a: A): Array[Byte] = f(a)
+  def apply[A](headers: Header*)(f: (A ⇒ Array[Byte])): RequestData[A] = new RequestData[A] {
+    def body(a: A): Array[Byte] = f(a)
+    def fallbackHeaders: List[Header] = headers.toList
   }
 
   implicit val requestDataString: RequestData[String] =
-    RequestData(_.getBytes)
+    RequestData(Headers.contentType("text/plain; charset=utf-8"))(_.getBytes("UTF-8"))
 }

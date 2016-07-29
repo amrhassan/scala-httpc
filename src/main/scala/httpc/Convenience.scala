@@ -22,10 +22,10 @@ trait Convenience {
   }
 
   def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): Future[HttpError Xor Response] =
-    doRequest(Method.Get, url)
+    doRequest(Methods.Get, url)
 
   def put[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): Future[HttpError Xor Response] =
-    doRequest(Method.Put, url, data)
+    doRequest(Methods.Put, url, data)
 
   def netInterpreter(implicit ec: ExecutionContext) = NetInterpreters.socketsInterpreter
 }
