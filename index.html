@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Scala-httpc by amrhassan</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Scala-httpc</h1>
+        <p>HTTP Client for Scala</p>
+
+        <p class="view"><a href="https://github.com/amrhassan/scala-httpc">View the Project on GitHub <small>amrhassan/scala-httpc</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/amrhassan/scala-httpc/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/amrhassan/scala-httpc/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/amrhassan/scala-httpc">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="scala-httpc" class="anchor" href="#scala-httpc" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>scala-httpc</h1>
+
+<p><a href="https://travis-ci.org/amrhassan/scala-httpc"><img src="https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master" alt="Build Status"></a></p>
+
+<p>HTTP Client for Scala built using functional programming and <a href="https://github.com/typelevel/cats">cats</a></p>
+
+<h1>
+<a id="usage-example" class="anchor" href="#usage-example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage Example</h1>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">import</span> <span class="pl-v">httpc.</span><span class="pl-v">_</span>
+<span class="pl-k">import</span> <span class="pl-v">cats.data.</span><span class="pl-v">Xor</span>
+<span class="pl-k">import</span> <span class="pl-v">scala.concurrent.ExecutionContext.Implicits.</span><span class="pl-v">global</span>
+<span class="pl-k">import</span> <span class="pl-v">cats.implicits.</span><span class="pl-v">_</span>
+
+<span class="pl-k">object</span> <span class="pl-en">Sandbox</span> <span class="pl-k">extends</span> <span class="pl-e">App</span> {
+
+  get(<span class="pl-s"><span class="pl-pds">"</span>http://www.example.com/<span class="pl-pds">"</span></span>) map {
+    <span class="pl-k">case</span> <span class="pl-en">Xor</span>.<span class="pl-en">Left</span>(e) <span class="pl-k">⇒</span> println(<span class="pl-s"><span class="pl-pds">"</span>ERROR: <span class="pl-pds">"</span></span> <span class="pl-k">+</span> e.show)
+    <span class="pl-k">case</span> <span class="pl-en">Xor</span>.<span class="pl-en">Right</span>(resp) <span class="pl-k">⇒</span>
+      println(resp.status)
+      println(resp.headers)
+      println(<span class="pl-k">new</span> <span class="pl-en">String</span>(resp.body))
+  }
+
+  <span class="pl-en">Thread</span>.sleep(<span class="pl-c1">10000</span>)
+}
+</pre></div>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/amrhassan">amrhassan</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>

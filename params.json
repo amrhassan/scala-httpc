@@ -1,0 +1,6 @@
+{
+  "name": "Scala-httpc",
+  "tagline": "HTTP Client for Scala",
+  "body": "# scala-httpc\r\n[![Build Status](https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master)](https://travis-ci.org/amrhassan/scala-httpc)\r\n\r\nHTTP Client for Scala built using functional programming and [cats](https://github.com/typelevel/cats)\r\n\r\n# Usage Example #\r\n```scala\r\nimport httpc._\r\nimport cats.data.Xor\r\nimport scala.concurrent.ExecutionContext.Implicits.global\r\nimport cats.implicits._\r\n\r\nobject Sandbox extends App {\r\n\r\n  get(\"http://www.example.com/\") map {\r\n    case Xor.Left(e) ⇒ println(\"ERROR: \" + e.show)\r\n    case Xor.Right(resp) ⇒\r\n      println(resp.status)\r\n      println(resp.headers)\r\n      println(new String(resp.body))\r\n  }\r\n\r\n  Thread.sleep(10000)\r\n}\r\n\r\n```\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
