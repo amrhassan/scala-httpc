@@ -32,3 +32,12 @@ object Sandbox extends App {
   Thread.sleep(10000)
 }
 ```
+
+# TODO #
+* [X] Safe TCP sockets API
+* [X] Minimal HTTP data structures and protocol
+* [X] Convenience public library API
+* [ ] HTTPS support
+* [ ] Optional JSON Support
+* [ ] Lots and lots of property tests
+* [ ] Benchmarks?
