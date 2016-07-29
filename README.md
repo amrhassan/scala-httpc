@@ -1,6 +1,6 @@
 # scala-httpc
 [![Build Status](https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master)](https://travis-ci.org/amrhassan/scala-httpc)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc_2.11)
 
 
 HTTP Client for Scala built using functional programming and [cats](https://github.com/typelevel/cats)
