@@ -3,7 +3,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc_2.11)
 
 
-HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
+A minimal HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
 
 # Usage #
 
@@ -38,6 +38,7 @@ object Sandbox extends App {
 * [X] Minimal HTTP data structures and protocol
 * [X] Convenience public library API
 * [ ] HTTPS support
+* [ ] Better documentation showcasing the public API
 * [ ] Optional JSON Support
 * [ ] Lots and lots of property tests
 * [ ] Benchmarks?
