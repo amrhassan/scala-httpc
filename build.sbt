@@ -10,6 +10,11 @@ val refined = Seq(
 )
 
 
+publishArtifact in Test := false
+publishMavenStyle := true
+pomIncludeRepository := { _ => false }
+
+
 libraryDependencies ++= cats ++ refined
 
 autoCompilerPlugins := true
@@ -23,3 +28,7 @@ scalacOptions ++= Seq(
   "-Xlint",
   "-feature"
 )
+
+licenses := Seq("MIT-style" -> url("http://www.opensource.org/licenses/mit-license.php"))
+
+homepage := Some(url("https://amrhassan.github.io/scala-httpc/"))
