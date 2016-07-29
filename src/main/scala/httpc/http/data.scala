@@ -103,4 +103,9 @@ object Status {
 }
 
 /** An HTTP response */
-case class Response(status: Status, headers: List[Header], body: Array[Byte])
+case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
+
+  /** Decodes the body as UTF-8 text */
+  def text: Option[String] =
+    Xor.catchNonFatal(new String(body, "UTF-8")).toOption
+}
