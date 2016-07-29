@@ -5,7 +5,7 @@ import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric._
 import eu.timepit.refined._
 
-
+/** TCP Networking */
 package object net {
   type NetIo[A] = Free[NetIoOp, A]
   type Length = Int Refined NonNegative

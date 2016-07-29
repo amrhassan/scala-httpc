@@ -1,5 +1,7 @@
 # scala-httpc
-HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
+[![Build Status](https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master)](https://travis-ci.org/amrhassan/scala-httpc)
+
+HTTP Client for Scala built using functional programming and [cats](https://github.com/typelevel/cats)
 
 # Usage Example #
 ```scala
