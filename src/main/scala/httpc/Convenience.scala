@@ -6,6 +6,7 @@ import httpc.net.NetInterpreters
 import cats.implicits._
 import httpc.http._
 
+
 /** Convenience construction and dispatching of requests */
 private [httpc] trait Convenience {
 
@@ -17,7 +18,7 @@ private [httpc] trait Convenience {
     )(implicit ec: ExecutionContext): Future[HttpError Xor Response] = {
 
     val response = Requests.request(method, url, data) >>= { case (address, request, port) ⇒
-      Http.execute(address, request, port)
+      http.execute(address, request, port)
     }
 
     HttpIo.run(response, netInterpreter).value

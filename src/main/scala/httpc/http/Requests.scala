@@ -6,8 +6,8 @@ import cats.data.Xor
 import cats.implicits._
 import httpc.http.HttpError.MalformedUrl
 import httpc.http.HttpIo._
-import httpc.net
-import httpc.net.NetIo
+import httpc.{http, net}
+
 
 /** Request building and execution */
 object Requests {
@@ -19,9 +19,9 @@ object Requests {
       parsedUrl ← xor(Xor.catchNonFatal(new URL(url)).leftMap(_ ⇒ MalformedUrl(url)))
       hostname = parsedUrl.getHost
       extraHeaders = List(Header(HeaderNames.Host, hostname))
-      address ← fromNetIo(NetIo.lookupAddress(hostname))
+      address ← fromNetIo(net.lookupAddress(hostname))
       request = Request(method, Path(parsedUrl.getPath), Message(extraHeaders, implicitly[RequestData[A]].body(data)))
-    } yield (address, request, Http.Port)
+    } yield (address, request, http.HttpPort)
 }
 
 /** Request content */

@@ -92,7 +92,7 @@ object Request {
 
   def render(r: Request): Vector[Byte] =
     Method.render(r.method) :+ space |+| Path.render(r.path) :+ space |+|
-      Http.Version :+ newline |+| Message.render(r.message)
+      HttpVersion :+ newline |+| Message.render(r.message)
 }
 
 case class Status(value: Int)

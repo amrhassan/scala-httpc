@@ -4,25 +4,25 @@ import scala.concurrent.ExecutionContext
 import cats.data.Xor
 import cats.implicits._
 import HttpIo._
-import httpc.net.{ConnectionId, NetIo, Bytes}
+import httpc.net.{Bytes, ConnectionId}
 import httpc.net
 
 
-object Http {
+trait Http {
 
-  val Version = "HTTP/1.1".getBytes.toVector
+  val HttpVersion = "HTTP/1.1".getBytes.toVector
 
-  val Port = net.Port.fromInt(80).getOrElse(throw new RuntimeException("Invalid HTTP port"))
+  val HttpPort = net.Port.fromInt(80).getOrElse(throw new RuntimeException("Invalid HTTP port"))
 
   /** Executes an HTTP request */
   def execute(address: net.Address, r: Request, port: net.Port)(implicit ec: ExecutionContext): HttpIo[Response] =
     for {
-      con ← fromNetIo(NetIo.connect(address, port))
-      _ ← fromNetIo(NetIo.write(con, Request.render(r).toArray))
+      con ← fromNetIo(net.connect(address, port))
+      _ ← fromNetIo(net.write(con, Request.render(r).toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
       bodySize ← bodySizeFromHeaders(headers)
-      body ← fromNetIo(NetIo.read(con, bodySize))
+      body ← fromNetIo(net.read(con, bodySize))
     } yield Response(status, headers, body.toArray)
 
   private def bodySizeFromHeaders(headers: List[Header]): HttpIo[net.Length] = xor {
@@ -56,6 +56,6 @@ object Http {
     }
 
   private def readLine(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[Vector[Byte]] = fromNetIo {
-    NetIo.readUntil(con, '\n'.toByte)
+    net.readUntil(con, '\n'.toByte)
   }
 }
