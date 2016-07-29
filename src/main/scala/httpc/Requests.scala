@@ -12,21 +12,15 @@ import cats.implicits._
 object Requests {
 
   /** Builds and executes an HTTP request */
-  def request[A: RequestData](method: Method, url: String, data: A = "")(implicit ec: ExecutionContext): HttpIo[Response] =
+  def request[A: RequestData](method: Method, url: String,
+    data: A)(implicit ec: ExecutionContext): HttpIo[(net.Address, Request, net.Port)] =
     for {
       parsedUrl ← xor(Xor.catchNonFatal(new URL(url)).leftMap(_ ⇒ MalformedUrl(url)))
       hostname = parsedUrl.getHost
       extraHeaders = List(Header(HeaderNames.Host, hostname))
       address ← fromNetIo(NetIo.lookupAddress(hostname))
       request = Request(method, Path(parsedUrl.getPath), Message(extraHeaders, implicitly[RequestData[A]].bytes(data)))
-      response ← Http.execute(address, request, Http.Port)
-    } yield response
-
-  def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpIo[Response] =
-    request(Method.Get, url)
-
-  def put[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpIo[Response] =
-    request(Method.Put, url, data)
+    } yield (address, request, Http.Port)
 }
 
 trait RequestData[A] {
