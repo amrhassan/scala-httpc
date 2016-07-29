@@ -17,7 +17,7 @@ object HttpError {
 
   def render(err: HttpError): String = "HTTP error: " |+| (err match {
     case MalformedHeader(header) ⇒ s"malformed header: $header"
-    case NetworkError(message) ⇒ s"network error: $message"
+    case NetworkError(message) ⇒ s"$message"
     case MalformedStatus(status) ⇒ s"malformed status: $status"
     case MissingContentLength ⇒ s"missing or malformed ${HeaderNames.ContentLength} header in response"
     case MalformedUrl(url) ⇒ s"malformed url $url"

@@ -13,7 +13,7 @@ object NetError {
 
   implicit val tcpErrorShow: Show[NetError] = Show.show(show)
 
-  def show(e: NetError): String = "Network error: " |+| (e match {
+  def show(e: NetError): String = "network error: " |+| (e match {
     case ConnectionNotFound(id) ⇒ s"$id is not an open connection"
     case HostNotFound(hostname) ⇒ s"$hostname not found"
     case UnexpectedError(message) ⇒ message
