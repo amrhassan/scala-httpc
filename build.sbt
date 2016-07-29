@@ -1,5 +1,6 @@
 name := "scala-httpc"
 
+organization := "amrhassan.github.io"
 version := "0.1.1"
 scalaVersion := "2.11.8"
 
