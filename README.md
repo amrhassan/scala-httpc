@@ -3,7 +3,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc_2.11)
 
 
-HTTP Client for Scala built using functional programming and [cats](https://github.com/typelevel/cats)
+HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
 
 # Usage #
 
