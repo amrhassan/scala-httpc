@@ -1,4 +1,4 @@
-package httpc
+package httpc.http
 
 import cats.Show
 import cats.implicits._

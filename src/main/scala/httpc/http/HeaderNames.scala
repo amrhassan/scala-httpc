@@ -1,4 +1,4 @@
-package httpc
+package httpc.http
 
 object HeaderNames {
   val ContentLength = "Content-Length"

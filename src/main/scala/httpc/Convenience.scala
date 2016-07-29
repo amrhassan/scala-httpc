@@ -4,9 +4,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.Xor
 import httpc.net.NetInterpreters
 import cats.implicits._
+import httpc.http._
 
 /** Convenience construction and dispatching of requests */
-trait Convenience {
+private [httpc] trait Convenience {
 
   def doRequest[A: RequestData](
     method: Method,

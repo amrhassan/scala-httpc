@@ -1,10 +1,11 @@
-package httpc
+package httpc.http
 
 import scala.concurrent.ExecutionContext
 import cats.data.Xor
-import httpc.net.{ConnectionId, NetIo, Port}
-import HttpIo._
 import cats.implicits._
+import HttpIo._
+import httpc.net.{ConnectionId, NetIo, Bytes}
+import httpc.net
 
 
 object Http {
@@ -14,7 +15,7 @@ object Http {
   val Port = net.Port.fromInt(80).getOrElse(throw new RuntimeException("Invalid HTTP port"))
 
   /** Executes an HTTP request */
-  def execute(address: net.Address, r: Request, port: Port)(implicit ec: ExecutionContext): HttpIo[Response] =
+  def execute(address: net.Address, r: Request, port: net.Port)(implicit ec: ExecutionContext): HttpIo[Response] =
     for {
       con ← fromNetIo(NetIo.connect(address, port))
       _ ← fromNetIo(NetIo.write(con, Request.render(r).toArray))

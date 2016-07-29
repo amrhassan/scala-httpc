@@ -1,4 +1,4 @@
-package httpc
+package httpc.http
 
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.{Kleisli, Xor, XorT}

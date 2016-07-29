@@ -1,7 +1,8 @@
-package httpc
+package httpc.http
 
 import cats.data.Xor
 import cats.implicits._
+import httpc.net.Bytes
 
 /** An HTTP header */
 case class Header(name: String, value: String)

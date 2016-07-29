@@ -1,12 +1,13 @@
-package httpc
+package httpc.http
 
 import java.net.URL
 import scala.concurrent.ExecutionContext
 import cats.data.Xor
-import httpc.HttpError.MalformedUrl
-import HttpIo._
-import httpc.net.NetIo
 import cats.implicits._
+import httpc.http.HttpError.MalformedUrl
+import httpc.http.HttpIo._
+import httpc.net
+import httpc.net.NetIo
 
 /** Request building and execution */
 object Requests {

@@ -1,4 +1,4 @@
-package httpc
+package httpc.net
 
 object Bytes {
 
