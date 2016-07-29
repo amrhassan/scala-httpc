@@ -12,6 +12,8 @@ private [httpc] trait Convenience {
   
   type HttpValue[A] = XorT[Future, HttpError, A]
 
+  type Response = http.Response
+
   /** Constructs and dispatches a request */
   def doRequest[A: RequestData](
     method: Method,
