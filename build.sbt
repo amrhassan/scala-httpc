@@ -1,8 +1,9 @@
 name := "scala-httpc"
 
-organization := "io.github.amrhassan"
-version := "0.1.4"
+version := "0.1.5"
 scalaVersion := "2.11.8"
+organization := "io.github.amrhassan"
+
 
 val cats = Seq("org.typelevel" %% "cats" % "0.6.0" )
 val refined = Seq(
@@ -30,6 +31,24 @@ scalacOptions ++= Seq(
   "-feature"
 )
 
-licenses := Seq("MIT-style" -> url("http://www.opensource.org/licenses/mit-license.php"))
 
-homepage := Some(url("https://amrhassan.github.io/scala-httpc/"))
+pomExtra := (
+  <url>https://amrhassan.github.io/scala-httpc/</url>
+    <licenses>
+      <license>
+        <name>MIT</name>
+        <url>http://www.opensource.org/licenses/mit-license.php</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+    <scm>
+      <url>git@github.com:amrhassan/scala-httpc.git</url>
+      <connection>scm:git:git@github.com:amrhassan/scala-httpc.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>amrhassan</id>
+        <name>Amr Hassan</name>
+        <url>http://amrhassan.info</url>
+      </developer>
+    </developers>)
