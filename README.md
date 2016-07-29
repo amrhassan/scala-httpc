@@ -6,23 +6,29 @@
 HTTP Client for Scala built using functional programming and [cats](https://github.com/typelevel/cats)
 
 # Usage Example #
+
+```
+libraryDependencies += "io.github.amrhassan" %% "httpc" % "0.1.6"
+```
+
 ```scala
 import httpc._
-import cats.data.Xor
 import scala.concurrent.ExecutionContext.Implicits.global
 import cats.implicits._
 
 object Sandbox extends App {
 
-  get("http://www.example.com/") map {
-    case Xor.Left(e) ⇒ println("ERROR: " + e.show)
-    case Xor.Right(resp) ⇒
-      println(resp.status)
-      println(resp.headers)
-      println(new String(resp.body))
+  get("https://httpbin.org/get") map { response ⇒
+    println(response.status)
+    println(response.text)
   }
 
+  put("https://httpbin.org/put", data = "OK Computer") map { response ⇒
+    println(response.status)
+    println(response.text)
+  }
+
+  // Because all APIs are non-blocking
   Thread.sleep(10000)
 }
-
 ```
