@@ -41,4 +41,4 @@ object Sandbox extends App {
 * [ ] Better documentation showcasing the public API
 * [ ] Optional JSON Support
 * [ ] Lots and lots of property tests
-* [ ] Benchmarks?
+* [ ] Benchmarks and performance optimizations
