@@ -1,60 +1,50 @@
 package httpc
 
 import scala.concurrent.{ExecutionContext, Future}
-import cats.data.XorT
-import httpc.net.NetInterpreters
-import cats.implicits._
 import httpc.http._
+import HttpAction._
+import cats.data.XorT
+import cats.implicits._
+import httpc.net.{NetInterpreters, NetIo}
 
 
 /** Convenience construction and dispatching of requests */
 private [httpc] trait Convenience {
   
-  type HttpValue[A] = XorT[Future, HttpError, A]
-
   type Response = http.Response
 
-  /** Constructs and dispatches a request */
-  def doRequest[A: RequestData](
-    method: Method,
-    url: String,
-    data: A = ""
-    )(implicit ec: ExecutionContext): HttpValue[Response] = {
+  def request[A: RequestData](method: Method, url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+    for {
+      goodUrl ← Url.parse(url)
+      protocol ← Requests.protocol(goodUrl)
+      request = Requests.request(method, goodUrl, data)
+      address ← fromNetIo(protocol.lookupAddress(goodUrl.host))
+      response ← dispatch(address, request, protocol.port)
+    } yield response
 
-    val response = Requests.request(method, url, data) >>= { case (address, request, port) ⇒
-      http.execute(address, request, port)
-    }
+  def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Get, url, data)
 
-    HttpIo.run(response, netInterpreter)
-  }
+  def put[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Put, url, data)
 
-  /** Constructs and dispatches a GET request */
-  def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Get, url)
+  def head[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Head, url, data)
 
-  /** Constructs and dispatches a PUT request */
-  def put[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Put, url, data)
+  def post[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Post, url, data)
 
-  /** Constructs and dispatches a HEAD request */
-  def head[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Head, url)
+  def delete[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Delete, url, data)
 
-  /** Constructs and dispatches a POST request */
-  def post[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Post, url, data)
+  def trace[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Trace, url, data)
 
-  /** Constructs and dispatches a DELETE request */
-  def delete[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Delete, url)
+  def options[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Methods.Options, url, data)
 
-  /** Constructs and dispatches a TRACE request */
-  def trace[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Trace, url)
-
-  /** Constructs and dispatches an OPTIONS request */
-  def options[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpValue[Response] =
-    doRequest(Methods.Options, url)
-
-  private def netInterpreter(implicit ec: ExecutionContext) = NetInterpreters.socketsInterpreter
+  def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): XorT[Future, HttpError, A] =
+    HttpAction.run(command, netInterpreter)
+  
+  private def netInterpreter(implicit ec: ExecutionContext): NetIo.Interpreter = NetInterpreters.socketsInterpreter
 }

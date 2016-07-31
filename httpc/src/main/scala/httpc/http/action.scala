@@ -6,23 +6,23 @@ import cats.implicits._
 import httpc.net.NetIo
 
 
-object HttpIo {
+object HttpAction {
 
-  /** Evaluates the given [[HttpIo]] program realizing all its effects */
-  def run[A](command: HttpIo[A], netInt: NetIo.Interpreter): XorT[Future, HttpError, A] =
+  /** Evaluates the given [[HttpAction]] program realizing all its effects */
+  def run[A](command: HttpAction[A], netInt: NetIo.Interpreter): XorT[Future, HttpError, A] =
     command.run(netInt)
 
-  def fromNetIo[A](command: NetIo[A])(implicit ec: ExecutionContext): HttpIo[A] = Kleisli {
+  def fromNetIo[A](command: NetIo[A])(implicit ec: ExecutionContext): HttpAction[A] = Kleisli {
     (netInt: NetIo.Interpreter) ⇒
       NetIo.run(command, netInt) leftMap (e ⇒ HttpError.NetworkError(e.show))
   }
 
-  def pure[A](a: A): HttpIo[A] =
+  def pure[A](a: A): HttpAction[A] =
     Kleisli(_ ⇒ XorT(Future.successful(Xor.right(a))))
 
-  def error[A](e: HttpError): HttpIo[A] =
+  def error[A](e: HttpError): HttpAction[A] =
     Kleisli(_ ⇒ XorT(Future.successful(Xor.left(e))))
 
-  def xor[A](fa: HttpError Xor A): HttpIo[A] =
+  def xor[A](fa: HttpError Xor A): HttpAction[A] =
     Kleisli(_ ⇒ XorT(Future.successful(fa)))
 }

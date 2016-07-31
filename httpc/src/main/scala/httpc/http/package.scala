@@ -6,5 +6,5 @@ import httpc.net.NetIo
 
 /** HTTP protocol */
 package object http extends Http {
-  type HttpIo[A] = Kleisli[XorT[Future, HttpError, ?], NetIo.Interpreter, A]
+  type HttpAction[A] = Kleisli[XorT[Future, HttpError, ?], NetIo.Interpreter, A]
 }

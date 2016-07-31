@@ -1,28 +1,27 @@
 package httpc.http
 
-import java.net.URL
-import scala.concurrent.ExecutionContext
-import cats.data.Xor
-import cats.implicits._
-import httpc.http.HttpError.MalformedUrl
-import httpc.http.HttpIo._
-import httpc.{http, net}
+import httpc.http.HttpError.UnsupportedProtocol
+import httpc.http.HttpAction._
 
 
-/** Request building and execution */
-object Requests {
+/** Request construction */
+trait Requests {
 
-  /** Builds and executes an HTTP request */
-  def request[A: RequestData](method: Method, url: String,
-    data: A)(implicit ec: ExecutionContext): HttpIo[(net.Address, Request, net.Port)] =
-    for {
-      parsedUrl ← xor(Xor.catchNonFatal(new URL(url)).leftMap(_ ⇒ MalformedUrl(url)))
-      hostname = parsedUrl.getHost
-      extraHeaders = List(Header(HeaderNames.Host, hostname))
-      address ← fromNetIo(net.lookupAddress(hostname))
-      request = Request(method, Path(parsedUrl.getPath), Message(extraHeaders, implicitly[RequestData[A]].body(data)))
-    } yield (address, request, http.HttpPort)
+  /** Builds an HTTP request */
+  def request[A: RequestData](method: Method, url: Url, data: A): Request = {
+    val dataTc = implicitly[RequestData[A]]
+    val headers = List(Header(HeaderNames.Host, url.host)) ++ dataTc.fallbackHeaders
+    Request(method, Path(url.path), Message(headers, dataTc.body(data)))
+  }
+
+  /** Figures out the HTTP protocol from the URL */
+  def protocol(url: Url): HttpAction[Protocol] = url.protocol.toLowerCase match {
+    case "http" ⇒ pure(Protocol.http)
+    case _ ⇒ error(UnsupportedProtocol(url.protocol))
+  }
 }
+
+object Requests extends Requests
 
 /** Request content */
 trait RequestData[A] {

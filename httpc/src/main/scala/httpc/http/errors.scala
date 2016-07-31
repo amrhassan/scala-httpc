@@ -12,6 +12,7 @@ object HttpError {
   case class NetworkError(message: String) extends HttpError
   case object MissingContentLength extends HttpError
   case class MalformedUrl(url: String) extends HttpError
+  case class UnsupportedProtocol(protocol: String) extends HttpError
 
   implicit val showHttpError: Show[HttpError] = Show.show(render)
 
@@ -21,5 +22,6 @@ object HttpError {
     case MalformedStatus(status) ⇒ s"malformed status: $status"
     case MissingContentLength ⇒ s"missing or malformed ${HeaderNames.ContentLength} header in response"
     case MalformedUrl(url) ⇒ s"malformed url $url"
+    case UnsupportedProtocol(protocol) ⇒ s"unsupported protocol $protocol"
   })
 }

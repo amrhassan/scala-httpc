@@ -3,7 +3,7 @@ package httpc.http
 import scala.concurrent.ExecutionContext
 import cats.data.Xor
 import cats.implicits._
-import HttpIo._
+import HttpAction._
 import httpc.net.{Bytes, ConnectionId}
 import httpc.net
 
@@ -14,8 +14,8 @@ trait Http {
 
   val HttpPort = net.Port.fromInt(80).getOrElse(throw new RuntimeException("Invalid HTTP port"))
 
-  /** Executes an HTTP request */
-  def execute(address: net.Address, r: Request, port: net.Port)(implicit ec: ExecutionContext): HttpIo[Response] =
+  /** Dispatches an HTTP request and retrieves a response for it */
+  def dispatch(address: net.Address, r: Request, port: net.Port)(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
       con ← fromNetIo(net.connect(address, port))
       _ ← fromNetIo(net.write(con, Request.render(r).toArray))
@@ -25,7 +25,7 @@ trait Http {
       body ← fromNetIo(net.read(con, bodySize))
     } yield Response(status, headers, body.toArray)
 
-  private def bodySizeFromHeaders(headers: List[Header]): HttpIo[net.Length] = xor {
+  private def bodySizeFromHeaders(headers: List[Header]): HttpAction[net.Length] = xor {
     for {
       header ← headers.find(_.name == HeaderNames.ContentLength).toRightXor(HttpError.MissingContentLength)
       value ← Xor.catchNonFatal(header.value.toInt).leftMap(_ ⇒ HttpError.MissingContentLength)
@@ -33,13 +33,13 @@ trait Http {
     } yield size
   }
 
-  private def readHeaders(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[List[Header]] = {
-    def readHeader(line: Vector[Byte]): HttpIo[Header] = xor {
+  private def readHeaders(con: ConnectionId)(implicit ec: ExecutionContext): HttpAction[List[Header]] = {
+    def readHeader(line: Vector[Byte]): HttpAction[Header] = xor {
       Header.read(line).toRightXor(HttpError.MalformedHeader(new String(line.toArray).trim))
     }
     readLine(con) >>= { line ⇒
       if (Bytes.isWhitespace(line)) {
-        HttpIo.pure(List.empty)
+        HttpAction.pure(List.empty)
       } else {
         readHeader(line) >>= { header ⇒
           readHeaders(con) map (header :: _)
@@ -48,14 +48,14 @@ trait Http {
     }
   }
 
-  private def readStatus(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[Status] =
+  private def readStatus(con: ConnectionId)(implicit ec: ExecutionContext): HttpAction[Status] =
     readLine(con) >>= { line ⇒
       val parts = Bytes.split(line, ' '.toByte)
       val status = Status.read(parts(1)).toRightXor(HttpError.MalformedStatus(Bytes.toString(line).trim))
-      HttpIo.xor(status)
+      HttpAction.xor(status)
     }
 
-  private def readLine(con: ConnectionId)(implicit ec: ExecutionContext): HttpIo[Vector[Byte]] = fromNetIo {
+  private def readLine(con: ConnectionId)(implicit ec: ExecutionContext): HttpAction[Vector[Byte]] = fromNetIo {
     net.readUntil(con, '\n'.toByte)
   }
 }

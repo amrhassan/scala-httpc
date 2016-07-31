@@ -18,15 +18,16 @@ import cats.implicits._
 
 object Sandbox extends App {
 
-  get("http://httpbin.org/get") map { response ⇒
-    println(response.status)
-    println(response.text)
-  }
+  val actions = List(
+    get("http://httpbin.org/get"),                // Description of a GET request yielding a response
+    put("http://httpbin.org/put", "OK Computer")  // Description of a PUT request yielding a response
+  )
 
-  put("http://httpbin.org/put", data = "OK Computer") map { response ⇒
+  actions.map(run) foreach { _.map { response ⇒   // Runs each command into an XorT[Future, HttpError, Response]
     println(response.status)
     println(response.text)
-  }
+    println("=======================")
+  }}
 
   // Because all APIs are non-blocking
   Thread.sleep(10000)
