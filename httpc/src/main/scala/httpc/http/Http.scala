@@ -8,13 +8,14 @@ import httpc.net.{Bytes, ConnectionId}
 import httpc.net
 
 
+/** Module API */
 trait Http {
 
   val HttpVersion = "HTTP/1.1".getBytes.toVector
 
   val HttpPort = net.Port.fromInt(80).getOrElse(throw new RuntimeException("Invalid HTTP port"))
 
-  /** Dispatches an HTTP request and retrieves a response for it */
+  /** Dispatches an HTTP request and yields a response for it */
   def dispatch(address: net.Address, r: Request, port: net.Port)(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
       con ← fromNetIo(net.connect(address, port))

@@ -3,6 +3,15 @@ package httpc.http
 import cats.data.Xor
 import cats.implicits._
 import httpc.net.Bytes
+import HttpAction._
+import httpc.http.HttpError.MalformedUrl
+
+
+object HeaderNames {
+  val ContentLength = "Content-Length"
+  val Host = "Host"
+  val ContentType = "Content-Type"
+}
 
 /** An HTTP header */
 case class Header(name: String, value: String)
@@ -108,4 +117,14 @@ case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
   /** Decodes the body as UTF-8 text */
   def text: Option[String] =
     Xor.catchNonFatal(new String(body, "UTF-8")).toOption
+}
+
+case class Url(protocol: String, host: String, path: String)
+
+object Url {
+  def parse(url: String): HttpAction[Url] = xor {
+    Xor.catchNonFatal(new java.net.URL(url)).leftMap(_ ⇒ MalformedUrl(url)) map { parsed ⇒
+      Url(parsed.getProtocol, parsed.getHost, parsed.getPath)
+    }
+  }
 }
