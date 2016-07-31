@@ -7,7 +7,7 @@ val commonDeps =
 
 lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
-  version := "0.1.7",
+  version := "0.2.0",
   scalaVersion := "2.11.8",
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.8.0"),

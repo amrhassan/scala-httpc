@@ -8,30 +8,33 @@ A minimal HTTP Client for Scala built using purely functional programming and [c
 # Usage #
 
 ```
-libraryDependencies += "io.github.amrhassan" %% "httpc" % "0.1.6"
+libraryDependencies += "io.github.amrhassan" %% "httpc" % "0.2.0"
 ```
 
 ```scala
 import httpc._
 import scala.concurrent.ExecutionContext.Implicits.global
+import cats.data.Xor
 import cats.implicits._
+
 
 object Sandbox extends App {
 
-  val actions = List(
-    get("http://httpbin.org/get"),                // Description of a GET request yielding a response
-    put("http://httpbin.org/put", "OK Computer")  // Description of a PUT request yielding a response
-  )
+  val command =
+    put("http://httpbin.org/put", data = "OK Computer")  // Description of a PUT request yielding a response
 
-  actions.map(run) foreach { _.map { response ⇒   // Runs each command into an XorT[Future, HttpError, Response]
-    println(response.status)
-    println(response.text)
-    println("=======================")
-  }}
+  // Run command into an Future[HttpError Xor Response]
+  run(command).map {
+    case Xor.Left(error) ⇒ println(error.show)
+    case Xor.Right(response) ⇒
+      println(response.status)
+      println(response.text)
+  }
 
   // Because all APIs are non-blocking
   Thread.sleep(10000)
 }
+
 ```
 
 # TODO #

@@ -3,7 +3,7 @@ package httpc
 import scala.concurrent.{ExecutionContext, Future}
 import httpc.http._
 import HttpAction._
-import cats.data.XorT
+import cats.data.Xor
 import cats.implicits._
 import httpc.net.{NetInterpreters, NetIo}
 
@@ -25,13 +25,13 @@ private [httpc] trait Convenience {
   def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Get, url, data)
 
-  def put[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpAction[Response] =
+  def put[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Put, url, data)
 
-  def head[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpAction[Response] =
+  def head[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Head, url, data)
 
-  def post[A: RequestData](url: String, data: A)(implicit ec: ExecutionContext): HttpAction[Response] =
+  def post[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Post, url, data)
 
   def delete[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
@@ -43,8 +43,8 @@ private [httpc] trait Convenience {
   def options[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Options, url, data)
 
-  def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): XorT[Future, HttpError, A] =
-    HttpAction.run(command, netInterpreter)
+  def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): Future[HttpError Xor A] =
+    HttpAction.run(command, netInterpreter).value
   
   private def netInterpreter(implicit ec: ExecutionContext): NetIo.Interpreter = NetInterpreters.socketsInterpreter
 }
