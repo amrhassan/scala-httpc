@@ -12,6 +12,7 @@ import httpc.net.{NetInterpreters, NetIo}
 private [httpc] trait Convenience {
   
   type Response = http.Response
+  type HttpError = http.HttpError
 
   def request[A: RequestData](method: Method, url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
