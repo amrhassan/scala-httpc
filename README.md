@@ -20,8 +20,8 @@ import cats.implicits._
 
 object Sandbox extends App {
 
-  val command =
-    put("http://httpbin.org/put", data = "OK Computer")  // Description of a PUT request yielding a response
+  // Description of a PUT request yielding a response
+  val command = put("http://httpbin.org/put", data = "OK Computer")
 
   // Run command into an Future[HttpError Xor Response]
   run(command).map {
