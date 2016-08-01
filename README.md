@@ -8,7 +8,8 @@ A minimal HTTP Client for Scala built using purely functional programming and [c
 # Usage #
 
 ```
-libraryDependencies += "io.github.amrhassan" %% "httpc" % "0.2.2"
+resolvers += Resolver.sonatypeRepo("snapshots")
+libraryDependencies ++= Seq("io.github.amrhassan" %% "httpc" % "0.3.0-SNAPSHOT")
 ```
 
 ```scala
