@@ -1,5 +1,6 @@
 package httpc.net
 
+import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.XorT
 import cats.free.Free
@@ -7,6 +8,7 @@ import cats.implicits._
 import cats.~>
 import httpc.net.NetError.ConnectionNotFound
 import httpc.net.sockets.{Addresses, Socket, SocketError}
+
 
 /** Networking operations */
 private [net] trait NetOp[A]
@@ -37,7 +39,18 @@ object NetInterpreters {
   /** Interpreter for TCP language using OS sockets */
   def socketsInterpreter(implicit ec: ExecutionContext) = new (NetOp ~> XorT[Future, NetError, ?]) {
 
-    var cons = Map.empty[ConnectionId, Socket]
+    // Warning: Scary imperative land ahead. Consider re-writing with StateT
+
+    val cons = mutable.Map.empty[ConnectionId, Socket]
+
+    def addCon(connectionId: ConnectionId, socket: Socket): ConnectionId = cons.synchronized {
+      cons(connectionId) = socket
+      connectionId
+    }
+
+    def dropCon(conId: ConnectionId): Unit = cons.synchronized {
+      cons.remove(conId)
+    }
 
     def apply[A](fa: NetOp[A]): XorT[Future, NetError, A] = XorT.fromXor[Future](fa match {
       case AddrLookup(hostname) ⇒
@@ -46,17 +59,17 @@ object NetInterpreters {
         for {
           socket <- Socket.connect(address, port) leftMap errorTranslate
           id = conId(socket)
-        } yield { cons = cons.updated(id, socket); id }
+        } yield { addCon(id, socket); id }
       case ConnectSsl(address, port) ⇒
         for {
           socket ← Socket.connectSsl(address, port) leftMap errorTranslate
           id = conId(socket)
-        } yield { cons = cons.updated(id, socket); id }
+        } yield { addCon(id, socket) }
       case Disconnect(id) ⇒
         for {
           socket ← cons.get(id).toRightXor(ConnectionNotFound(id))
           _ ← socket.disconnect() leftMap errorTranslate
-        } yield { cons = cons - id; () }
+        } yield { dropCon(id) }
       case Read(id, length) ⇒
         for {
           socket ← cons.get(id).toRightXor(ConnectionNotFound(id))
