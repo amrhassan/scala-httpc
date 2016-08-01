@@ -43,4 +43,7 @@ object RequestData {
 
   implicit val requestDataString: RequestData[String] =
     RequestData(Headers.contentType("text/plain; charset=utf-8"))(_.getBytes("UTF-8"))
+
+  implicit val requestDataBytes: RequestData[Array[Byte]] =
+    RequestData()(identity)
 }

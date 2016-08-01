@@ -24,25 +24,25 @@ private [httpc] trait Convenience {
       response ← dispatch(connectionId, request)
     } yield response
 
-  def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def get[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Get, url, data)
 
-  def put[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def put[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Put, url, data)
 
-  def head[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def head[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Head, url, data)
 
-  def post[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def post[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Post, url, data)
 
-  def delete[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def delete[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Delete, url, data)
 
-  def trace[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def trace[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Trace, url, data)
 
-  def options[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
+  def options[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Methods.Options, url, data)
 
   def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): Future[HttpError Xor A] =

@@ -16,6 +16,7 @@ trait Http {
   /** Dispatches an HTTP request and yields a response for it */
   def dispatch(con: net.ConnectionId, r: Request)(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
+      _ ← fromNetIo(net.write(con, Request.render(r).toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
       bodySize ← bodySizeFromHeaders(headers)
