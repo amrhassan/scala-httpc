@@ -23,6 +23,11 @@ object NetInterpreters {
           socket <- Socket.connect(address, port) leftMap errorTranslate
           id = conId(socket)
         } yield { cons = cons.updated(id, socket); id }
+      case ConnectSsl(address, port) ⇒
+        for {
+          socket ← Socket.connectSsl(address, port) leftMap errorTranslate
+          id = conId(socket)
+        } yield { cons = cons.updated(id, socket); id }
       case Disconnect(id) ⇒
         for {
           socket ← cons.get(id).toRightXor(ConnectionNotFound(id))

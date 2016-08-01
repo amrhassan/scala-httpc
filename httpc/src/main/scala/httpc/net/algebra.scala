@@ -10,6 +10,7 @@ import cats.~>
 private [net] trait NetIoOp[A]
 private [net] case class AddrLookup(hostname: String) extends NetIoOp[Address]
 private [net] case class Connect(address: Address, port: Port) extends NetIoOp[ConnectionId]
+private [net] case class ConnectSsl(address: Address, port: Port) extends NetIoOp[ConnectionId]
 private [net] case class Read(conId: ConnectionId, length: Length) extends NetIoOp[Array[Byte]]
 private [net] case class Write(conId: ConnectionId, data: Array[Byte]) extends NetIoOp[Unit]
 private [net] case class Disconnect(conId: ConnectionId) extends NetIoOp[Unit]

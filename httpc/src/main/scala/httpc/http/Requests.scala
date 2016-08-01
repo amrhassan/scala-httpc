@@ -17,6 +17,7 @@ trait Requests {
   /** Figures out the HTTP protocol from the URL */
   def protocol(url: Url): HttpAction[Protocol] = url.protocol.toLowerCase match {
     case "http" ⇒ pure(Protocol.http)
+    case "https" ⇒ pure(Protocol.https)
     case _ ⇒ error(UnsupportedProtocol(url.protocol))
   }
 }

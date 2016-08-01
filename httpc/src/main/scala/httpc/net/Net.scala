@@ -16,6 +16,10 @@ trait Net {
   def connect(address: Address, port: Port): NetIo[ConnectionId] =
     liftF(Connect(address, port))
 
+  /** Opens a secure connection to the given address and port */
+  def connectSsl(address: Address, port: Port): NetIo[ConnectionId] =
+    liftF(ConnectSsl(address, port))
+
   /** Reads data from a connection */
   def read(connectionId: ConnectionId, length: Length): NetIo[Array[Byte]] =
     liftF(Read(connectionId, length))

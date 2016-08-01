@@ -3,6 +3,7 @@ package httpc.net.sockets
 import java.io.{InputStream, OutputStream}
 import cats.data.Xor
 import java.net.{InetAddress, UnknownHostException, Socket ⇒ JSocket}
+import javax.net.ssl.SSLSocketFactory
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.NonNegative
 import httpc.net.{Address, Port}
@@ -37,9 +38,17 @@ object Socket {
   /** Connects to the specified address and port via TCP */
   def connect(address: Address, port: Port): SocketError Xor Socket =
     catchIoException {
-      val js = new JSocket(address.inet, port.number)
-      Socket(js, js.getInputStream, js.getOutputStream)
+      fromJavaSocket(new JSocket(address.inet, port.number))
     }
+
+  /** Connects to the specified address and port via TCP over SSL */
+  def connectSsl(address: Address, port: Port): SocketError Xor Socket =
+    catchIoException {
+      fromJavaSocket(SSLSocketFactory.getDefault.createSocket(address.inet, port.number))
+    }
+
+  private def fromJavaSocket(js: JSocket): Socket =
+    Socket(js, js.getInputStream, js.getOutputStream)
 }
 
 object Addresses {
