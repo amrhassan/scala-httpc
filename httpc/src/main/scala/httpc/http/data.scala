@@ -125,7 +125,8 @@ case class Url(protocol: String, host: String, port: Option[net.Port], path: Str
 object Url {
   def parse(url: String): HttpAction[Url] = xor {
     Xor.catchNonFatal(new java.net.URL(url)).leftMap(_ ⇒ MalformedUrl(url)) map { parsed ⇒
-      Url(parsed.getProtocol, parsed.getHost, net.Port.fromInt(parsed.getPort), parsed.getPath)
+      val path = parsed.getPath
+      Url(parsed.getProtocol, parsed.getHost, net.Port.fromInt(parsed.getPort), if (path.isEmpty) "/" else path)
     }
   }
 }
