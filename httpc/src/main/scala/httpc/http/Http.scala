@@ -13,19 +13,14 @@ trait Http {
 
   val HttpVersion = "HTTP/1.1".getBytes.toVector
 
-  val HttpPort = net.Port.fromInt(80).getOrElse(throw new RuntimeException("Invalid HTTP port"))
-  val HttpsPort = net.Port.fromInt(443).getOrElse(throw new RuntimeException("Invalid HTTPS port"))
-
   /** Dispatches an HTTP request and yields a response for it */
-  def dispatch(address: net.Address, r: Request, protocol: Protocol)(implicit ec: ExecutionContext): HttpAction[Response] =
+  def dispatch(con: net.ConnectionId, r: Request)(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
-      con ← fromNetIo(protocol.connect(address, protocol.port))
-      _ ← fromNetIo(net.write(con, Request.render(r).toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
       bodySize ← bodySizeFromHeaders(headers)
       body ← fromNetIo(net.read(con, bodySize))
-    } yield Response(status, headers, body.toArray)
+    } yield Response(status, headers, body)
 
   private def bodySizeFromHeaders(headers: List[Header]): HttpAction[net.Length] = xor {
     for {

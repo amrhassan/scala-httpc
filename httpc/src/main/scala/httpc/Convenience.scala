@@ -20,7 +20,8 @@ private [httpc] trait Convenience {
       protocol ← Requests.protocol(goodUrl)
       request = Requests.request(method, goodUrl, data)
       address ← fromNetIo(protocol.lookupAddress(goodUrl.host))
-      response ← dispatch(address, request, protocol)
+      connectionId ← fromNetIo(protocol.connect(address, goodUrl.port.getOrElse(protocol.defaultPort)))
+      response ← dispatch(connectionId, request)
     } yield response
 
   def get[A: RequestData](url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =

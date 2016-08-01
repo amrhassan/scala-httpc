@@ -3,6 +3,7 @@ package httpc.http
 import cats.data.Xor
 import cats.implicits._
 import httpc.net.Bytes
+import httpc.net
 import HttpAction._
 import httpc.http.HttpError.MalformedUrl
 
@@ -119,12 +120,12 @@ case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
     Xor.catchNonFatal(new String(body, "UTF-8")).toOption
 }
 
-case class Url(protocol: String, host: String, path: String)
+case class Url(protocol: String, host: String, port: Option[net.Port], path: String)
 
 object Url {
   def parse(url: String): HttpAction[Url] = xor {
     Xor.catchNonFatal(new java.net.URL(url)).leftMap(_ ⇒ MalformedUrl(url)) map { parsed ⇒
-      Url(parsed.getProtocol, parsed.getHost, parsed.getPath)
+      Url(parsed.getProtocol, parsed.getHost, net.Port.fromInt(parsed.getPort), parsed.getPath)
     }
   }
 }
