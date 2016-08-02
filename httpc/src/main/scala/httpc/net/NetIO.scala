@@ -57,7 +57,7 @@ object NetInterpreters {
         Addresses.lookup(hostname) leftMap errorTranslate
       case Connect(address, port) ⇒
         for {
-          socket <- Socket.connect(address, port) leftMap errorTranslate
+          socket ← Socket.connect(address, port) leftMap errorTranslate
           id = conId(socket)
         } yield { addCon(id, socket); id }
       case ConnectSsl(address, port) ⇒
