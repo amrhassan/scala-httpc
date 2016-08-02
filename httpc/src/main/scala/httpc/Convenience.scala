@@ -17,11 +17,12 @@ private [httpc] trait Convenience {
   def request[A: RequestData](method: Method, url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
       goodUrl ← Url.parse(url)
-      protocol ← Requests.protocol(goodUrl)
+      protocol ← Requests.netProtocol(goodUrl)
       request = Requests.request(method, goodUrl, data)
-      address ← fromNetIo(protocol.lookupAddress(goodUrl.host))
+      address ← fromNetIo(net.lookupAddress(goodUrl.host))
       connectionId ← fromNetIo(protocol.connect(address, goodUrl.port.getOrElse(protocol.defaultPort)))
       response ← dispatch(connectionId, request)
+      _ ← fromNetIo(net.disconnect(connectionId))
     } yield response
 
   def get[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =

@@ -14,10 +14,10 @@ trait Requests {
     Request(method, Path(url.path), Message(headers, dataTc.body(data)))
   }
 
-  /** Figures out the HTTP protocol from the URL */
-  def protocol(url: Url): HttpAction[Protocol] = url.protocol.toLowerCase match {
-    case "http" ⇒ pure(Protocol.http)
-    case "https" ⇒ pure(Protocol.https)
+  /** Figures out the networking protocol from the URL */
+  def netProtocol(url: Url): HttpAction[NetProtocol] = url.protocol.toLowerCase match {
+    case "http" ⇒ pure(NetProtocol.http)
+    case "https" ⇒ pure(NetProtocol.https)
     case _ ⇒ error(UnsupportedProtocol(url.protocol))
   }
 }
