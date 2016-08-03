@@ -3,17 +3,18 @@ package httpc.http
 import scala.concurrent.{ExecutionContext, Future}
 import cats.data.{Kleisli, Xor, XorT}
 import cats.implicits._
+import httpc.net
 import httpc.net.NetIo
 
 
 object HttpAction {
 
   /** Evaluates the given [[HttpAction]] program realizing all its effects */
-  def run[A](command: HttpAction[A], netInt: NetIo.Interpreter): XorT[Future, HttpError, A] =
+  def run[A](command: HttpAction[A], netInt: net.Interpreter): XorT[Future, HttpError, A] =
     command.run(netInt)
 
   def fromNetIo[A](command: NetIo[A])(implicit ec: ExecutionContext): HttpAction[A] = Kleisli {
-    (netInt: NetIo.Interpreter) ⇒
+    (netInt: net.Interpreter) ⇒
       NetIo.run(command, netInt) leftMap (e ⇒ HttpError.NetworkError(e.show))
   }
 

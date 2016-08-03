@@ -2,7 +2,6 @@ package httpc.net
 
 import cats.free.Free.liftF
 import cats.implicits._
-import NetIo._
 
 /** Network operations */
 trait Net {
@@ -27,7 +26,7 @@ trait Net {
   def readUntil(conId: ConnectionId, marker: Byte): NetIo[Vector[Byte]] =
     read(conId, 1).map(_.toVector) >>= { bytes ⇒
       if (bytes(0) === marker)
-        pure(bytes)
+        NetIo.pure(bytes)
       else
         readUntil(conId, marker) map (bytes ++ _)
     }

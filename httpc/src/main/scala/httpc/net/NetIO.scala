@@ -5,7 +5,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.XorT
 import cats.free.Free
 import cats.implicits._
-import cats.~>
 import httpc.net.NetError.ConnectionNotFound
 import httpc.net.sockets.{Addresses, Socket, SocketError}
 
@@ -22,9 +21,6 @@ private [net] case class Disconnect(conId: ConnectionId) extends NetOp[Unit]
 
 object NetIo {
 
-  /** The interpreter can be used with the `run()` function to produce a result out of a description of an action */
-  type Interpreter = NetOp ~> XorT[Future, NetError, ?]
-
   def pure[A](a: A): NetIo[A] =
     Free.pure(a)
 
@@ -37,7 +33,7 @@ object NetIo {
 object NetInterpreters {
 
   /** Interpreter for TCP language using OS sockets */
-  def socketsInterpreter(implicit ec: ExecutionContext) = new (NetOp ~> XorT[Future, NetError, ?]) {
+  def socketsInterpreter(implicit ec: ExecutionContext) = new Interpreter {
 
     // Warning: Scary imperative land ahead. Consider re-writing with StateT
 

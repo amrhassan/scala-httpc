@@ -5,7 +5,7 @@ import httpc.http._
 import HttpAction._
 import cats.data.Xor
 import cats.implicits._
-import httpc.net.{NetInterpreters, NetIo}
+import httpc.net.NetInterpreters
 
 
 /** Convenience construction and dispatching of requests */
@@ -49,5 +49,5 @@ private [httpc] trait Convenience {
   def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): Future[HttpError Xor A] =
     HttpAction.run(command, netInterpreter).value
   
-  private def netInterpreter(implicit ec: ExecutionContext): NetIo.Interpreter = NetInterpreters.socketsInterpreter
+  private def netInterpreter(implicit ec: ExecutionContext): net.Interpreter = NetInterpreters.socketsInterpreter
 }
