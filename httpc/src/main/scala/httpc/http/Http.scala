@@ -23,12 +23,11 @@ trait Http {
       body ← fromNetIo(net.read(con, bodySize))
     } yield Response(status, headers, body)
 
-  private def bodySizeFromHeaders(headers: List[Header]): HttpAction[net.Length] = xor {
+  private def bodySizeFromHeaders(headers: List[Header]): HttpAction[Int] = xor {
     for {
       header ← headers.find(_.name == HeaderNames.ContentLength).toRightXor(HttpError.MissingContentLength)
       value ← Xor.catchNonFatal(header.value.toInt).leftMap(_ ⇒ HttpError.MissingContentLength)
-      size ← net.length(value).toRightXor(HttpError.MissingContentLength)
-    } yield size
+    } yield value
   }
 
   private def readHeaders(con: ConnectionId)(implicit ec: ExecutionContext): HttpAction[List[Header]] = {

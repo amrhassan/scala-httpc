@@ -15,7 +15,7 @@ private [net] trait NetOp[A]
 private [net] case class AddrLookup(hostname: String) extends NetOp[Address]
 private [net] case class Connect(address: Address, port: Port) extends NetOp[ConnectionId]
 private [net] case class ConnectSsl(address: Address, port: Port) extends NetOp[ConnectionId]
-private [net] case class Read(conId: ConnectionId, length: Length) extends NetOp[Array[Byte]]
+private [net] case class Read(conId: ConnectionId, length: Int) extends NetOp[Array[Byte]]
 private [net] case class Write(conId: ConnectionId, data: Array[Byte]) extends NetOp[Unit]
 private [net] case class Disconnect(conId: ConnectionId) extends NetOp[Unit]
 

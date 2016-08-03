@@ -4,8 +4,6 @@ import java.io.{InputStream, OutputStream}
 import cats.data.Xor
 import java.net.{InetAddress, UnknownHostException, Socket ⇒ JSocket}
 import javax.net.ssl.SSLSocketFactory
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.numeric.NonNegative
 import httpc.net.{Address, Port}
 import SocketError._
 
@@ -18,9 +16,9 @@ case class Socket private[sockets](socket: JSocket, in: InputStream, out: Output
     catchIoException(socket.close())
 
   /** Reads bytes of the specified length from the socket */
-  def read(length: Int Refined NonNegative): SocketError Xor Array[Byte] =
+  def read(length: Int): SocketError Xor Array[Byte] =
     catchIoException {
-      val buffer = Array.ofDim[Byte](length.get)
+      val buffer = Array.ofDim[Byte](length)
       val _ = in.read(buffer)
       buffer
     }

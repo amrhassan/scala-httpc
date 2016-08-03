@@ -2,8 +2,7 @@
 import Dependencies._
 
 val commonDeps =
-  cats ++
-  refined
+  cats
 
 lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",

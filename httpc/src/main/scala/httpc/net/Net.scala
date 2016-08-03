@@ -1,7 +1,6 @@
 package httpc.net
 
 import cats.free.Free.liftF
-import eu.timepit.refined._
 import cats.implicits._
 import NetIo._
 
@@ -21,12 +20,12 @@ trait Net {
     liftF(ConnectSsl(address, port))
 
   /** Reads data from a connection */
-  def read(connectionId: ConnectionId, length: Length): NetIo[Array[Byte]] =
+  def read(connectionId: ConnectionId, length: Int): NetIo[Array[Byte]] =
     liftF(Read(connectionId, length))
 
   /** Reads bytes until the specified marker byte and returns all bytes including the marker suffix */
   def readUntil(conId: ConnectionId, marker: Byte): NetIo[Vector[Byte]] =
-    read(conId, refineMV(1)).map(_.toVector) >>= { bytes ⇒
+    read(conId, 1).map(_.toVector) >>= { bytes ⇒
       if (bytes(0) === marker)
         pure(bytes)
       else
