@@ -38,6 +38,14 @@ object Headers {
   /** Content-Type header */
   def contentType(value: String): Header =
     Header(HeaderNames.ContentType, value)
+
+  /** Host header */
+  def host(hostname: String): Header =
+    Header(HeaderNames.Host, hostname)
+
+  /** Content-Length header */
+  def contentLength(length: Int): Header =
+    Header(HeaderNames.ContentLength, length.toString)
 }
 
 /** An HTTP message */

@@ -9,9 +9,19 @@ trait Requests {
 
   /** Builds an HTTP request */
   def request[A: RequestData](method: Method, url: Url, data: A): Request = {
-    val dataTc = implicitly[RequestData[A]]
-    val headers = List(Header(HeaderNames.Host, url.host)) ++ dataTc.fallbackHeaders
-    Request(method, Path(url.path), Message(headers, dataTc.body(data)))
+    val requestData = implicitly[RequestData[A]]
+    val dataBytes = requestData.body(data)
+
+    val requiredHeaders = List(Headers.host(url.host), Headers.contentLength(dataBytes.length))
+    val customHeaders = requestData.fallbackHeaders
+
+    Request(method, Path(url.path), Message(headers(requiredHeaders, customHeaders), dataBytes))
+  }
+
+  private def headers(requiredHeaders: List[Header], customHeaders: List[Header]): List[Header] = {
+    // Required headers overridden by custom headers
+    val z = requiredHeaders.map(h ⇒ (h.name, h)).toMap
+    customHeaders.foldRight(z)((header, headers) ⇒ headers.updated(header.name, header)).values.toList
   }
 
   /** Figures out the networking protocol from the URL */

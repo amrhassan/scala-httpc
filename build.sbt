@@ -8,6 +8,7 @@ lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
   version := "0.3.0-SNAPSHOT",
   scalaVersion := "2.11.8",
+  crossScalaVersions := Seq("2.10.6", "2.11.8"),
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.8.0"),
   addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full),
@@ -49,6 +50,14 @@ lazy val httpc = project
     name := "httpc"
   )
 
+lazy val `httpc-circe` = project
+  .settings(commonSettings:_*)
+  .settings(
+    name := "httpc-circe",
+    libraryDependencies ++= circe
+  )
+  .dependsOn(httpc)
+
 lazy val root = (project in file("."))
   .settings(packagedArtifacts := Map.empty)
-  .aggregate(httpc)
+  .aggregate(httpc, `httpc-circe`)

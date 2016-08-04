@@ -3,14 +3,14 @@ import sbt._
 
 object Dependencies {
 
-  val refined = {
-    val version = "0.5.0"
-    Seq(
-      "eu.timepit" %% "refined" % version,
-      "eu.timepit" %% "refined-scalacheck" % version % Test
-    )
-  }
+  val cats = Seq(
+    "org.typelevel" %% "cats-core",
+    "org.typelevel" %% "cats-free"
+  ) map (_ % "0.6.1")
 
-  val cats = Seq("org.typelevel" %% "cats" % "0.6.0")
+  val circe = Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-parser"
+  ).map(_ % "0.5.0-M2")
 }
 
