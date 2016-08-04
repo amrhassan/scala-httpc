@@ -13,7 +13,8 @@ libraryDependencies ++= Seq("io.github.amrhassan" %% "httpc" % "0.3.0-SNAPSHOT")
 ```
 
 ```scala
-import httpc._  // All you need to import actually
+import httpc._                  // All you need to import actually
+import httpc.support.circe._    // For JSON support, if you included the httpc-circe module
 import scala.concurrent.ExecutionContext.Implicits.global // Gotta have one of those in scope
 
 // The rest of the imports are for the demo purposes
@@ -36,6 +37,7 @@ object Sandbox extends App {
     case Xor.Right(response) ⇒
       println(response.status)
       println(response.text)
+      println(response.json)
   }
 }
 ```
@@ -46,6 +48,6 @@ object Sandbox extends App {
 * [X] Convenience public library API
 * [X] HTTPS support
 * [ ] Better documentation showcasing the public API
-* [ ] Optional JSON Support
+* [X] Optional JSON Support
 * [ ] Lots and lots of property tests
 * [ ] Benchmarks and performance optimizations
