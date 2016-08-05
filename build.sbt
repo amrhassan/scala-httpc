@@ -58,6 +58,6 @@ lazy val `httpc-circe` = project
   )
   .dependsOn(httpc)
 
-lazy val root = (project in file("."))
+lazy val `scala-httpc` = (project in file("."))
   .settings(packagedArtifacts := Map.empty)
   .aggregate(httpc, `httpc-circe`)
