@@ -9,7 +9,10 @@ A minimal HTTP Client for Scala built using purely functional programming and [c
 
 ```sbt
 resolvers += Resolver.sonatypeRepo("snapshots")
-libraryDependencies ++= Seq("io.github.amrhassan" %% "httpc" % "0.3.0-SNAPSHOT")
+libraryDependencies ++= Seq(
+  "io.github.amrhassan" %% "httpc" % "0.3.0-SNAPSHOT",
+  "io.github.amrhassan" %% "httpc-circe" % "0.3.0-SNAPSHOT"  // Optional Circe support
+  )
 ```
 
 ```scala
@@ -37,7 +40,7 @@ object Sandbox extends App {
     case Xor.Right(response) ⇒
       println(response.status)
       println(response.text)
-      println(response.json)
+      println(response.json)  // Only if you've imported httpc.support.circe._
   }
 }
 ```
