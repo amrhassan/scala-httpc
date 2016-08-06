@@ -2,7 +2,6 @@ package httpc
 
 import scala.concurrent.{ExecutionContext, Future}
 import httpc.http._
-import HttpAction._
 import cats.data.Xor
 import cats.implicits._
 import httpc.net.NetInterpreters
@@ -17,34 +16,30 @@ private [httpc] trait Convenience {
   def request[A: RequestData](method: Method, url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
       goodUrl ← Url.parse(url)
-      protocol ← Requests.netProtocol(goodUrl)
       request = Requests.request(method, goodUrl, data)
-      address ← fromNetIo(net.lookupAddress(goodUrl.host))
-      connectionId ← fromNetIo(protocol.connect(address, goodUrl.port.getOrElse(protocol.defaultPort)))
-      response ← dispatch(connectionId, request)
-      _ ← fromNetIo(net.disconnect(connectionId))
+      response ← dispatch(goodUrl, request)
     } yield response
 
   def get[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Get, url, data)
+    request(Method.Get, url, data)
 
   def put[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Put, url, data)
+    request(Method.Put, url, data)
 
   def head[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Head, url, data)
+    request(Method.Head, url, data)
 
   def post[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Post, url, data)
+    request(Method.Post, url, data)
 
   def delete[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Delete, url, data)
+    request(Method.Delete, url, data)
 
   def trace[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Trace, url, data)
+    request(Method.Trace, url, data)
 
   def options[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
-    request(Methods.Options, url, data)
+    request(Method.Options, url, data)
 
   def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): Future[HttpError Xor A] =
     HttpAction.run(command, netInterpreter).value

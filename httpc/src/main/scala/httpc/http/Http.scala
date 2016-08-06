@@ -14,13 +14,17 @@ trait Http {
   val HttpVersion = "HTTP/1.1".getBytes.toVector
 
   /** Dispatches an HTTP request and yields a response for it */
-  def dispatch(con: net.ConnectionId, r: Request)(implicit ec: ExecutionContext): HttpAction[Response] =
+  def dispatch(url: Url, r: Request)(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
+      netProtocol ← Requests.netProtocol(url)
+      address ← fromNetIo(net.lookupAddress(url.host))
+      con ← fromNetIo(netProtocol.connect(address, url.port.getOrElse(netProtocol.defaultPort)))
       _ ← fromNetIo(net.write(con, Request.render(r).toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
       bodySize ← bodySizeFromHeaders(headers)
       body ← fromNetIo(net.read(con, bodySize))
+      _ ← fromNetIo(net.disconnect(con))
     } yield Response(status, headers, body)
 
   private def bodySizeFromHeaders(headers: List[Header]): HttpAction[Int] = xor {

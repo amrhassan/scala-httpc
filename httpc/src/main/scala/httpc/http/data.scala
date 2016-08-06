@@ -6,6 +6,7 @@ import httpc.net.Bytes
 import httpc.net
 import HttpAction._
 import httpc.http.HttpError.MalformedUrl
+import enumeratum._
 
 
 object HeaderNames {
@@ -66,11 +67,9 @@ object Message {
     r.body.toVector
 }
 
-sealed trait Method
+sealed trait Method extends EnumEntry
 
-object Method {
-
-  import Methods._
+object Method extends Enum[Method] {
 
   def render(m: Method): Vector[Byte] = (m match {
     case Get ⇒ "GET"
@@ -81,9 +80,7 @@ object Method {
     case Trace ⇒ "Trace"
     case Head ⇒ "HEAD"
   }).getBytes.toVector
-}
 
-object Methods {
   case object Get extends Method
   case object Put extends Method
   case object Post extends Method
@@ -91,6 +88,8 @@ object Methods {
   case object Options extends Method
   case object Trace extends Method
   case object Head extends Method
+
+  val values: Seq[Method] = findValues
 }
 
 case class Path(path: String)
