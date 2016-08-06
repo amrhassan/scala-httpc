@@ -1,18 +1,13 @@
 package httpc
 
-import scala.concurrent.{ExecutionContext, Future}
-import httpc.http._
-import cats.data.Xor
+import scala.concurrent.ExecutionContext
 import cats.implicits._
-import httpc.net.NetInterpreters
+import httpc.http._
 
 
 /** Convenience construction and dispatching of requests */
 private [httpc] trait Convenience {
   
-  type Response = http.Response
-  type HttpError = http.HttpError
-
   def request[A: RequestData](method: Method, url: String, data: A = "")(implicit ec: ExecutionContext): HttpAction[Response] =
     for {
       goodUrl ← Url.parse(url)
@@ -41,8 +36,5 @@ private [httpc] trait Convenience {
   def options[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Method.Options, url, data)
 
-  def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): Future[HttpError Xor A] =
-    HttpAction.run(command, netInterpreter).value
-  
-  private def netInterpreter(implicit ec: ExecutionContext): net.Interpreter = NetInterpreters.socketsInterpreter
+  def run(implicit ec: ExecutionContext) = http.run _
 }

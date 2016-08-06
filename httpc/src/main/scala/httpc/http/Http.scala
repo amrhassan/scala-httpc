@@ -1,10 +1,10 @@
 package httpc.http
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import cats.data.Xor
 import cats.implicits._
 import HttpAction._
-import httpc.net.{Bytes, ConnectionId}
+import httpc.net.{Bytes, ConnectionId, NetInterpreters}
 import httpc.net
 
 
@@ -59,4 +59,9 @@ trait Http {
   private def readLine(con: ConnectionId)(implicit ec: ExecutionContext): HttpAction[Vector[Byte]] = fromNetIo {
     net.readUntil(con, '\n'.toByte)
   }
+
+  def run[A](command: HttpAction[A])(implicit ec: ExecutionContext): Future[HttpError Xor A] =
+    HttpAction.run(command, netInterpreter).value
+
+  private def netInterpreter(implicit ec: ExecutionContext): net.Interpreter = NetInterpreters.socketsInterpreter
 }
