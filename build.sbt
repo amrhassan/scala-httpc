@@ -2,13 +2,16 @@
 import Dependencies._
 
 val commonDeps =
-  cats
+  cats ++
+  scalaCheck ++
+  enumeratum ++
+  specs2
 
 lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
   version := "0.3.0-SNAPSHOT",
   scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.10.6", "2.11.8"),
+  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-M5"),
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.8.0"),
   addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full),
@@ -22,6 +25,7 @@ lazy val commonSettings = Seq(
     "-Xlint",
     "-feature"
   ),
+  scalacOptions in Test ++= Seq("-Yrangepos"),
   pomExtra := (
     <url>https://amrhassan.github.io/scala-httpc/</url>
       <licenses>

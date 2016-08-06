@@ -35,6 +35,4 @@ private [httpc] trait Convenience {
 
   def options[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Method.Options, url, data)
-
-  def run(implicit ec: ExecutionContext) = http.run _
 }

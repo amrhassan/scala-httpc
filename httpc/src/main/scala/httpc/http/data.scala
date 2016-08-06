@@ -92,11 +92,11 @@ object Method extends Enum[Method] {
   val values: Seq[Method] = findValues
 }
 
-case class Path(path: String)
+case class Path(value: String)
 
 object Path {
   def render(p: Path): Vector[Byte] =
-    p.path.getBytes.toVector
+    p.value.getBytes.toVector
 }
 
 /** An HTTP request */
@@ -127,13 +127,13 @@ case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
     Xor.catchNonFatal(new String(body, "UTF-8")).toOption
 }
 
-case class Url(protocol: String, host: String, port: Option[net.Port], path: String)
+case class Url(protocol: String, host: String, port: Option[net.Port], path: Path)
 
 object Url {
   def parse(url: String): HttpAction[Url] = xor {
     Xor.catchNonFatal(new java.net.URL(url)).leftMap(_ ⇒ MalformedUrl(url)) map { parsed ⇒
       val path = parsed.getPath
-      Url(parsed.getProtocol, parsed.getHost, net.Port.fromInt(parsed.getPort), if (path.isEmpty) "/" else path)
+      Url(parsed.getProtocol, parsed.getHost, net.Port.fromInt(parsed.getPort), Path(if (path.isEmpty) "/" else path))
     }
   }
 }

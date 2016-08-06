@@ -15,7 +15,7 @@ trait Requests {
     val requiredHeaders = List(Headers.host(url.host), Headers.contentLength(dataBytes.length))
     val customHeaders = requestData.fallbackHeaders
 
-    Request(method, Path(url.path), Message(headers(requiredHeaders, customHeaders), dataBytes))
+    Request(method, url.path, Message(headers(requiredHeaders, customHeaders), dataBytes))
   }
 
   private def headers(requiredHeaders: List[Header], customHeaders: List[Header]): List[Header] = {
