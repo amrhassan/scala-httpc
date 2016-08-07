@@ -21,6 +21,9 @@ private [httpc] trait Convenience {
   def put[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Method.Put, url, data)
 
+  def patch[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
+    request(Method.Patch, url, data)
+
   def head[A: RequestData](url: String, data: A = Array.empty[Byte])(implicit ec: ExecutionContext): HttpAction[Response] =
     request(Method.Head, url, data)
 

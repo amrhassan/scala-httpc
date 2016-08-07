@@ -74,6 +74,7 @@ object Method extends Enum[Method] {
   def render(m: Method): Vector[Byte] = (m match {
     case Get ⇒ "GET"
     case Put ⇒ "PUT"
+    case Patch ⇒ "PATCH"
     case Post ⇒ "POST"
     case Delete ⇒ "DELETE"
     case Options ⇒ "OPTIONS"
@@ -83,6 +84,7 @@ object Method extends Enum[Method] {
 
   case object Get extends Method
   case object Put extends Method
+  case object Patch extends Method
   case object Post extends Method
   case object Delete extends Method
   case object Options extends Method

@@ -16,13 +16,15 @@ object Arbitraries {
     case Method.Put ⇒ s"/put"
     case Method.Post ⇒ s"/post"
     case Method.Delete ⇒ s"/delete"
+    case Method.Patch ⇒ s"/patch"
     case _ ⇒ ???
   })
   def urlFor(method: Method) =
     Url.parse(s"$scheme://$hostname${path(method).value}")
 
   implicit val arbMethod: Arbitrary[Method] = Arbitrary {
-    oneOf(Method.Put, Method.Post, Method.Delete) // Get responses fro Http Bin can sometimes not contain Content-Length request header
+    oneOf(Method.Put, Method.Post, Method.Delete, Method.Patch)
+    // Get responses fro Http Bin can sometimes not contain Content-Length request header
   }
 
   implicit val arbRequest: Arbitrary[Request] = Arbitrary {
