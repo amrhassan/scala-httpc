@@ -43,7 +43,6 @@ class HttpcSpec(implicit ee: ExecutionEnv) extends Specification with ScalaCheck
   } ("Request did not send correct body")
 
   def haveSentCorrectHeaders(headers: List[Header]) = requestMetadataMatcher { bin ⇒
-    println(bin)
     headers forall { header ⇒
       bin.headers(header.name) == header.value
     }
