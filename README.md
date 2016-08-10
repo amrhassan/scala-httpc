@@ -1,7 +1,7 @@
 # scala-httpc
 [![Build Status](https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master)](https://travis-ci.org/amrhassan/scala-httpc)
 
-A minimal HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
+A reasonably minimal HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
 
 # Usage #
 
