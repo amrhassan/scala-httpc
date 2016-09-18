@@ -5,7 +5,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.XorT
 import cats.free.Free
 import cats.implicits._
-import httpc.net.NetError.ConnectionNotFound
+import NetError.ConnectionNotFound
 import httpc.net.sockets.{Addresses, Socket, SocketError}
 
 
@@ -35,17 +35,17 @@ object NetInterpreters {
   /** Interpreter for TCP language using OS sockets */
   def socketsInterpreter(implicit ec: ExecutionContext) = new Interpreter {
 
-    // Warning: Scary imperative land ahead. Consider re-writing with StateT
+    // Warning: Scary imperative land ahead
 
-    val cons = mutable.Map.empty[ConnectionId, Socket]
+    val conns = mutable.Map.empty[ConnectionId, Socket]
 
-    def addCon(connectionId: ConnectionId, socket: Socket): ConnectionId = cons.synchronized {
-      cons(connectionId) = socket
+    def addConn(connectionId: ConnectionId, socket: Socket): ConnectionId = conns.synchronized {
+      conns(connectionId) = socket
       connectionId
     }
 
-    def dropCon(conId: ConnectionId): Unit = cons.synchronized {
-      cons.remove(conId)
+    def dropConn(conId: ConnectionId): Unit = conns.synchronized {
+      conns.remove(conId)
     }
 
     def apply[A](fa: NetOp[A]): XorT[Future, NetError, A] = XorT.fromXor[Future](fa match {
@@ -54,31 +54,31 @@ object NetInterpreters {
       case Connect(address, port) ⇒
         for {
           socket ← Socket.connect(address, port) leftMap errorTranslate
-          id = conId(socket)
-        } yield { addCon(id, socket); id }
+          id = connId(socket)
+        } yield { addConn(id, socket); id }
       case ConnectSsl(address, port) ⇒
         for {
           socket ← Socket.connectSsl(address, port) leftMap errorTranslate
-          id = conId(socket)
-        } yield { addCon(id, socket) }
+          id = connId(socket)
+        } yield { addConn(id, socket) }
       case Disconnect(id) ⇒
         for {
-          socket ← cons.get(id).toRightXor(ConnectionNotFound(id))
+          socket ← conns.get(id).toRightXor(ConnectionNotFound(id))
           _ ← socket.disconnect() leftMap errorTranslate
-        } yield { dropCon(id) }
+        } yield { dropConn(id) }
       case Read(id, length) ⇒
         for {
-          socket ← cons.get(id).toRightXor(ConnectionNotFound(id))
+          socket ← conns.get(id).toRightXor(ConnectionNotFound(id))
           data ← socket.read(length) leftMap errorTranslate
         } yield data
       case Write(id, data) ⇒
         for {
-          socket ← cons.get(id).toRightXor(ConnectionNotFound(id))
+          socket ← conns.get(id).toRightXor(ConnectionNotFound(id))
           _ ← socket.write(data) leftMap errorTranslate
         } yield ()
     })
 
-    def conId(socket: Socket): ConnectionId =
+    def connId(socket: Socket): ConnectionId =
       ConnectionId(socket.socket.getPort | (socket.socket.getLocalPort << 16))
 
     def errorTranslate(socketError: SocketError): NetError = socketError match {
