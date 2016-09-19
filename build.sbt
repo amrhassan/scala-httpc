@@ -48,12 +48,19 @@ lazy val commonSettings = Seq(
       </developers>)
 )
 
+val `httpc-net` = project
+  .settings(commonSettings:_*)
+  .settings(
+    name := "httpc-net"
+  )
+
 lazy val httpc = project
   .settings(commonSettings:_*)
   .settings(
     name := "httpc",
     libraryDependencies ++= circeTest ++ base64Test
   )
+  .dependsOn(`httpc-net`)
 
 lazy val `httpc-circe` = project
   .settings(commonSettings:_*)

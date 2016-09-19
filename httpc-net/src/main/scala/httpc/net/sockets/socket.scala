@@ -1,11 +1,11 @@
 package httpc.net.sockets
 
 import java.io.{InputStream, OutputStream}
-import cats.data.Xor
-import java.net.{InetAddress, UnknownHostException, Socket ⇒ JSocket}
+import java.net.{InetAddress, UnknownHostException, Socket => JSocket}
 import javax.net.ssl.SSLSocketFactory
+import cats.data.Xor
 import httpc.net.{Address, Port}
-import SocketError._
+import httpc.net.sockets.SocketError._
 
 
 /** A TCP socket */
@@ -53,8 +53,8 @@ object Addresses {
 
   /** Looks up an Address by a hostname */
   def lookup(hostname: String): SocketError Xor Address =
-  Xor.catchNonFatal(Address(InetAddress.getByName(hostname))) leftMap {
-    case t: UnknownHostException ⇒ SocketError.UnknownHost(hostname)
-    case t: SecurityException ⇒ SocketError.NotAllowed(t.getMessage)
-  }
+    Xor.catchNonFatal(Address(InetAddress.getByName(hostname))) leftMap {
+      case t: UnknownHostException ⇒ SocketError.UnknownHost(hostname)
+      case t: SecurityException ⇒ SocketError.NotAllowed(t.getMessage)
+    }
 }
