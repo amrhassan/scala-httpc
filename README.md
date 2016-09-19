@@ -42,13 +42,3 @@ object Sandbox extends App {
   }
 }
 ```
-
-# TODO #
-* [X] Safe TCP sockets API
-* [X] Minimal HTTP data structures and protocol
-* [X] Convenience public library API
-* [X] HTTPS support
-* [ ] Better documentation showcasing the public API
-* [X] Optional JSON Support
-* [ ] Lots and lots of property tests
-* [ ] Benchmarks and performance optimizations
