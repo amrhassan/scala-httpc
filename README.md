@@ -5,7 +5,7 @@ A reasonably minimal HTTP Client for Scala built using purely functional program
 
 Optional support for JSON payloads is available via [Circe](https://github.com/travisbrown/circe).
 
-# Usage #
+# Quick Usage #
 
 ```sbt
 resolvers += Resolver.sonatypeRepo("snapshots")
