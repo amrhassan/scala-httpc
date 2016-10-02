@@ -1,11 +1,10 @@
 package httpc.http
 
-import cats.data.Xor
 import cats.implicits._
 import httpc.net.{Bytes, Port}
-import HttpAction._
-import httpc.http.HttpError.MalformedUrl
 import enumeratum._
+import Render.ops._
+import Render._
 
 
 object HeaderNames {
@@ -19,21 +18,18 @@ case class Header(name: String, value: String)
 
 object Header {
 
-  /** Renders a Header into bytes */
-  def render(header: Header): Vector[Byte] =
+  implicit val renderHeader: Render[Header] = Render { header =>
     s"${header.name}: ${header.value}".getBytes.toVector
+  }
 
   /** Reads a Header from a sequence of bytes */
-  def read(bytes: Vector[Byte]): Option[Header] = {
+  private [http] def read(bytes: Vector[Byte]): Option[Header] = {
     val line = new String(bytes.toArray)
     if (line contains ':') {
       val (key, value) = line.splitAt(line.indexOf(':'))
       Some(Header(key.trim, value.drop(1).trim))
     } else None
   }
-}
-
-object Headers {
 
   /** Content-Type header */
   def contentType(value: String): Header =
@@ -53,33 +49,31 @@ case class Message(headers: List[Header], body: Array[Byte])
 
 object Message {
 
-  /** Renders a message into bytes */
-  def render(r: Message): Vector[Byte] =
-    renderHeaders(r) |+| renderBody(r)
-
-  /** Renders headers into bytes */
-  def renderHeaders(r: Message): Vector[Byte] =
-    r.headers.map(h ⇒ Header.render(h) :+ '\n'.toByte).foldK :+ '\n'.toByte
-
-  /** Renders body */
-  def renderBody(r: Message): Vector[Byte] =
-    r.body.toVector
+  implicit val renderMessage: Render[Message] = Render { message =>
+    val headers = (message.headers map (_.render |+| newline)).foldK |+| newline
+    val body = message.body.toVector
+    headers |+| body
+  }
 }
 
 sealed trait Method extends EnumEntry
 
 object Method extends Enum[Method] {
 
-  def render(m: Method): Vector[Byte] = (m match {
-    case Get ⇒ "GET"
-    case Put ⇒ "PUT"
-    case Patch ⇒ "PATCH"
-    case Post ⇒ "POST"
-    case Delete ⇒ "DELETE"
-    case Options ⇒ "OPTIONS"
-    case Trace ⇒ "Trace"
-    case Head ⇒ "HEAD"
-  }).getBytes.toVector
+  implicit val methodRender: Render[Method] = Render { method =>
+    val str = method match {
+      case Get ⇒ "GET"
+      case Put ⇒ "PUT"
+      case Patch ⇒ "PATCH"
+      case Post ⇒ "POST"
+      case Delete ⇒ "DELETE"
+      case Options ⇒ "OPTIONS"
+      case Trace ⇒ "Trace"
+      case Head ⇒ "HEAD"
+    }
+    str.getBytes.toVector
+  }
+
 
   case object Get extends Method
   case object Put extends Method
@@ -96,8 +90,7 @@ object Method extends Enum[Method] {
 case class Path(value: String)
 
 object Path {
-  def render(p: Path): Vector[Byte] =
-    p.value.getBytes.toVector
+  implicit val pathRender: Render[Path] = Render(_.value.getBytes.toVector)
 }
 
 /** An HTTP request */
@@ -105,19 +98,17 @@ case class Request(method: Method, path: Path, message: Message)
 
 object Request {
 
-  private val space = ' '.toByte
-  private val newline = '\n'.toByte
-
-  def render(r: Request): Vector[Byte] =
-    Method.render(r.method) :+ space |+| Path.render(r.path) :+ space |+|
-      HttpVersion :+ newline |+| Message.render(r.message)
+  implicit val renderRequest: Render[Request] = Render { r =>
+    r.method.render |+| space |+| r.path.render |+| space |+| HttpVersion |+| newline |+|
+      r.message.render
+  }
 }
 
 case class Status(value: Int)
 
 object Status {
-  def read(bytes: Vector[Byte]): Option[Status] =
-    Xor.catchNonFatal(Bytes.toString(bytes).toInt).toOption map Status.apply
+  private [http] def read(bytes: Vector[Byte]): Option[Status] =
+    Either.catchNonFatal(Bytes.toString(bytes).toInt).toOption map Status.apply
 }
 
 /** An HTTP response */
@@ -125,16 +116,15 @@ case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
 
   /** Decodes the body as UTF-8 text */
   def text: Option[String] =
-    Xor.catchNonFatal(new String(body, "UTF-8")).toOption
+    Either.catchNonFatal(new String(body, "UTF-8")).toOption
 }
 
 case class Url(protocol: String, host: String, port: Option[Port], path: Path)
 
 object Url {
-  def parse(url: String): HttpAction[Url] = xor {
-    Xor.catchNonFatal(new java.net.URL(url)).leftMap(_ ⇒ MalformedUrl(url)) map { parsed ⇒
+  def parse(url: String): Option[Url] =
+    Either.catchNonFatal(new java.net.URL(url)).toOption map { parsed ⇒
       val path = parsed.getPath
       Url(parsed.getProtocol, parsed.getHost, Port.fromInt(parsed.getPort), Path(if (path.isEmpty) "/" else path))
     }
-  }
 }

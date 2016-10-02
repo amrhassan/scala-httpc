@@ -5,7 +5,8 @@ val commonDeps =
   cats ++
   scalaCheck ++
   enumeratum ++
-  specs2
+  specs2 ++
+  simulacrum
 
 lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
@@ -15,6 +16,7 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.8.0"),
   addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   publishArtifact in Test := false,
   publishMavenStyle := true,
   pomIncludeRepository := { _ => false },
@@ -23,7 +25,8 @@ lazy val commonSettings = Seq(
     "-Xfatal-warnings",
     "-Ywarn-unused-import",
     "-Xlint",
-    "-feature"
+    "-feature",
+    "-language:implicitConversions"
   ),
   scalacOptions in Test ++= Seq("-Yrangepos"),
   pomExtra := (
@@ -54,22 +57,30 @@ val `httpc-net` = project
     name := "httpc-net"
   )
 
-lazy val httpc = project
+val `httpc-http` = project
   .settings(commonSettings:_*)
   .settings(
-    name := "httpc",
+    name := "httpc-http",
     libraryDependencies ++= circeTest ++ base64Test
   )
   .dependsOn(`httpc-net`)
 
-lazy val `httpc-circe` = project
+val `httpc-circe` = project
   .settings(commonSettings:_*)
   .settings(
     name := "httpc-circe",
     libraryDependencies ++= circe
   )
-  .dependsOn(httpc)
+  .dependsOn(`httpc-http`)
+
+val httpc = project
+  .settings(commonSettings:_*)
+  .settings(
+    name := "httpc"
+  )
+  .dependsOn(`httpc-http`)
+  .dependsOn(`httpc-circe`)
 
 lazy val `scala-httpc` = (project in file("."))
   .settings(packagedArtifacts := Map.empty)
-  .aggregate(httpc, `httpc-circe`)
+  .aggregate(httpc, `httpc-net`, `httpc-circe`, `httpc-http`)

@@ -3,20 +3,20 @@ package httpc.net.sockets
 import java.io.{InputStream, OutputStream}
 import java.net.{InetAddress, UnknownHostException, Socket => JSocket}
 import javax.net.ssl.SSLSocketFactory
-import cats.data.Xor
 import httpc.net.{Address, Port}
 import httpc.net.sockets.SocketError._
+import cats.implicits._
 
 
 /** A TCP socket */
 case class Socket private[sockets](socket: JSocket, in: InputStream, out: OutputStream) {
 
    /** Disconnects the given socket and frees its allocated system resources */
-  def disconnect(): SocketError Xor Unit =
+  def disconnect(): Either[SocketError, Unit] =
     catchIoException(socket.close())
 
   /** Reads bytes of the specified length from the socket */
-  def read(length: Int): SocketError Xor Array[Byte] =
+  def read(length: Int): Either[SocketError, Array[Byte]] =
     catchIoException {
       val buffer = Array.ofDim[Byte](length)
       val _ = in.read(buffer)
@@ -24,7 +24,7 @@ case class Socket private[sockets](socket: JSocket, in: InputStream, out: Output
     }
 
   /** Writes bytes to the specified socket */
-  def write(bytes: Array[Byte]): SocketError Xor Unit =
+  def write(bytes: Array[Byte]): Either[SocketError, Unit] =
     catchIoException {
       out.write(bytes)
       out.flush()
@@ -34,13 +34,13 @@ case class Socket private[sockets](socket: JSocket, in: InputStream, out: Output
 object Socket {
 
   /** Connects to the specified address and port via TCP */
-  def connect(address: Address, port: Port): SocketError Xor Socket =
+  def connect(address: Address, port: Port): Either[SocketError, Socket] =
     catchIoException {
       fromJavaSocket(new JSocket(address.inet, port.number))
     }
 
   /** Connects to the specified address and port via TCP over SSL */
-  def connectSsl(address: Address, port: Port): SocketError Xor Socket =
+  def connectSsl(address: Address, port: Port): Either[SocketError, Socket] =
     catchIoException {
       fromJavaSocket(SSLSocketFactory.getDefault.createSocket(address.inet, port.number))
     }
@@ -52,8 +52,8 @@ object Socket {
 object Addresses {
 
   /** Looks up an Address by a hostname */
-  def lookup(hostname: String): SocketError Xor Address =
-    Xor.catchNonFatal(Address(InetAddress.getByName(hostname))) leftMap {
+  def lookup(hostname: String): Either[SocketError, Address] =
+    Either.catchNonFatal(Address(InetAddress.getByName(hostname))) leftMap {
       case t: UnknownHostException ⇒ SocketError.UnknownHost(hostname)
       case t: SecurityException ⇒ SocketError.NotAllowed(t.getMessage)
     }

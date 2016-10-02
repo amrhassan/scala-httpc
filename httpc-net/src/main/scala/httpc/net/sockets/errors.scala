@@ -2,7 +2,7 @@ package httpc.net.sockets
 
 import java.io.IOException
 import cats.Show
-import cats.data.Xor
+import cats.implicits._
 
 
 sealed trait SocketError
@@ -19,6 +19,6 @@ object SocketError {
     case UnknownHost(hostname) ⇒ s"Hostname $hostname is unknown"
   }
 
-  def catchIoException[A](a: ⇒ A): SocketError Xor A =
-    Xor.catchOnly[IOException](a) leftMap (t ⇒ IO(t.getMessage))
+  def catchIoException[A](a: ⇒ A): Either[SocketError, A] =
+    Either.catchOnly[IOException](a) leftMap (t ⇒ IO(t.getMessage))
 }

@@ -19,7 +19,8 @@ object Arbitraries {
     case Method.Patch ⇒ s"/patch"
     case _ ⇒ ???
   })
-  def urlFor(method: Method) =
+
+  def urlFor(method: Method): Option[Url] =
     Url.parse(s"$scheme://$hostname${path(method).value}")
 
   implicit val arbMethod: Arbitrary[Method] = Arbitrary {
@@ -42,8 +43,8 @@ object Arbitraries {
     for {
       body ← arbitrary[Array[Byte]]
       headers =
-        (if (body.nonEmpty) List(Headers.contentLength(body.length)) else List.empty) |+|
-        List(Headers.host(hostname))
+        (if (body.nonEmpty) List(Header.contentLength(body.length)) else List.empty) |+|
+        List(Header.host(hostname))
     } yield Message(headers, body)
   }
 }
