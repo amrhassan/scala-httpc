@@ -20,5 +20,11 @@ object Dependencies {
   val base64Test = Seq("com.github.marklister" %% "base64" % "0.2.2" % Test)
 
   val simulacrum = Seq("com.github.mpilquist" %% "simulacrum" % "0.8.0")
+
+  val fs2 = Seq(
+    "co.fs2" %% "fs2-cats" % "0.1.0",
+    "co.fs2" %% "fs2-io" % "0.9.1",
+    "co.fs2" %% "fs2-core" % "0.9.1"
+  )
 }
 

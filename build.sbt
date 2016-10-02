@@ -73,6 +73,14 @@ val `httpc-circe` = project
   )
   .dependsOn(`httpc-http`)
 
+val `httpc-streams` = project
+  .settings(commonSettings:_*)
+  .settings(
+    name := "httpc-streams",
+    libraryDependencies ++= fs2
+  )
+  .dependsOn(`httpc-http`)
+
 val httpc = project
   .settings(commonSettings:_*)
   .settings(
@@ -83,4 +91,4 @@ val httpc = project
 
 lazy val `scala-httpc` = (project in file("."))
   .settings(packagedArtifacts := Map.empty)
-  .aggregate(httpc, `httpc-net`, `httpc-circe`, `httpc-http`)
+  .aggregate(httpc, `httpc-net`, `httpc-circe`, `httpc-http`, `httpc-streams`)
