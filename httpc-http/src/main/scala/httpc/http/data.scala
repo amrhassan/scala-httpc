@@ -1,5 +1,6 @@
 package httpc.http
 
+import scala.util.Try
 import cats.implicits._
 import httpc.net.{Bytes, Port}
 import enumeratum._
@@ -42,6 +43,21 @@ object Header {
   /** Content-Length header */
   def contentLength(length: Int): Header =
     Header(HeaderNames.ContentLength, length.toString)
+}
+
+object Headers {
+
+  /** Overwrites the base headers with custom headers */
+  def overwrite(base: List[Header], custom: List[Header]): List[Header] =
+    (toMap(base) ++ toMap(custom)).values.toList
+
+  /** Constructs a mapping using each header's name */
+  def toMap(headers: Traversable[Header]): Map[String, Header] =
+    Maps.fromTraversable[String, Header](headers, _.name)
+
+  /** Determines response body size given the response headers */
+  def determineBodySize(headers: List[Header]): Option[Int] =
+    headers.find(_.name == HeaderNames.ContentLength) >>= (header => Try(header.value.toInt).toOption)
 }
 
 /** An HTTP message */

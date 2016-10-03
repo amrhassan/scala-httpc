@@ -14,65 +14,62 @@ trait Http {
 
   /** Dispatches a request yielding a response for it */
   def dispatch(url: Url, r: Request): HttpAction[Response] =
+    sendRequest(url, r) >>= receiveResponse
+
+  /** Sends the given request and returns the [[ConnectionId]] of the connection */
+  private [httpc] def sendRequest(url: Url, r: Request): HttpAction[ConnectionId] =
     for {
-      netProtocol ← NetProtocol.fromUrl(url)
-      address ← fromNetIo(net.lookupAddress(url.host))
+      netProtocol <- NetProtocol.fromUrl(url)
+      address <- fromNetIo(net.lookupAddress(url.host))
       con ← fromNetIo(netProtocol.connect(address, url.port.getOrElse(netProtocol.defaultPort)))
       _ ← fromNetIo(net.write(con, r.render.toArray))
-      status ← readStatus(con)
-      headers ← readHeaders(con)
-      bodySize ← bodySizeFromHeaders(headers)
-      body ← fromNetIo(net.read(con, bodySize))
-      _ ← fromNetIo(net.disconnect(con))
+    } yield con
+
+  private [httpc] def receiveResponse(connectionId: ConnectionId): HttpAction[Response] =
+    for {
+      status ← receiveStatus(connectionId)
+      headers ← receiveHeaders(connectionId)
+      bodySize ← either(Headers.determineBodySize(headers).toRight(HttpError.MissingContentLength))
+      body ← fromNetIo(net.read(connectionId, bodySize))
+      _ ← fromNetIo(net.disconnect(connectionId))
     } yield Response(status, headers, body)
 
-  /** Builds a request */
-  def request[A: ToRequest](method: Method, url: Url, data: A): Request = {
-    val dataBytes = ToRequest[A].body(data)
+  private [httpc] def buildRequest[A: ToRequest](method: Method, url: Url, data: A): Request = {
 
-    val requiredHeaders = List(Header.host(url.host), Header.contentLength(dataBytes.length))
-    val customHeaders = ToRequest[A].fallbackHeaders
+    val body = ToRequest[A].body(data)
 
-    val message = Message(requestHeaders(requiredHeaders, customHeaders), dataBytes)
-    Request(method, url.path, message)
+    val requiredHeaders = List(
+      Header.host(url.host),
+      Header.contentLength(body.length))
+
+    val headers = Headers.overwrite(requiredHeaders, ToRequest[A].fallbackHeaders)
+
+    Request(method, url.path, Message(headers, body))
   }
 
-  private def requestHeaders(requiredHeaders: List[Header], customHeaders: List[Header]): List[Header] = {
-    // Required headers overridden by custom headers
-    val z = requiredHeaders.map(h ⇒ (h.name, h)).toMap
-    customHeaders.foldRight(z)((header, headers) ⇒ headers.updated(header.name, header)).values.toList
-  }
-
-  private def bodySizeFromHeaders(headers: List[Header]): HttpAction[Int] = either {
-    for {
-      header ← headers.find(_.name == HeaderNames.ContentLength).toRight(HttpError.MissingContentLength)
-      value ← Either.catchNonFatal(header.value.toInt).leftMap(_ ⇒ HttpError.MissingContentLength)
-    } yield value
-  }
-
-  private def readHeaders(con: ConnectionId): HttpAction[List[Header]] = {
+  private [httpc] def receiveHeaders(con: ConnectionId): HttpAction[List[Header]] = {
     def readHeader(line: Vector[Byte]): HttpAction[Header] = either {
-      Header.read(line).toRight(HttpError.MalformedHeader(new String(line.toArray).trim))
+      Header.read(line).toRight(HttpError.MalformedHeader(Bytes.toString(line).trim))
     }
-    readLine(con) >>= { line ⇒
+    receiveLine(con) >>= { line ⇒
       if (Bytes.isWhitespace(line)) {
         HttpAction.pure(List.empty)
       } else {
         readHeader(line) >>= { header ⇒
-          readHeaders(con) map (header :: _)
+          receiveHeaders(con) map (header :: _)
         }
       }
     }
   }
 
-  private def readStatus(con: ConnectionId): HttpAction[Status] =
-    readLine(con) >>= { line ⇒
+  private [httpc] def receiveStatus(con: ConnectionId): HttpAction[Status] =
+    receiveLine(con) >>= { line ⇒
       val parts = Bytes.split(line, ' '.toByte)
       val status = Status.read(parts(1)).toRight(HttpError.MalformedStatus(Bytes.toString(line).trim))
       HttpAction.either(status)
     }
 
-  private def readLine(con: ConnectionId): HttpAction[Vector[Byte]] = fromNetIo {
+  private def receiveLine(con: ConnectionId): HttpAction[Vector[Byte]] = fromNetIo {
     net.readUntil(con, '\n'.toByte)
   }
 

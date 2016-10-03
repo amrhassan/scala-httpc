@@ -14,7 +14,7 @@ private [httpc] trait Convenient {
   def request[A: ToRequest](method: Method, url: String, data: A = ""): Httpc[Response] =
     for {
       goodUrl ← fromEither(Url.parse(url).toRight[HttpcError](MalformedUrl(url)))
-      request = http.request(method, goodUrl, data)
+      request = http.buildRequest(method, goodUrl, data)
       response ← fromHttpAction(dispatch(goodUrl, request))
     } yield response
 
