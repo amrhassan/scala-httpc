@@ -1,5 +1,6 @@
 package httpc.http
 
+import scala.util.Try
 import cats.implicits._
 import HttpAction._
 import httpc.net.{Bytes, ConnectionId, NetInterpreters}
@@ -13,7 +14,7 @@ trait Http {
   val HttpVersion = "HTTP/1.1".getBytes.toVector
 
   /** Dispatches a request yielding a response for it */
-  def dispatch(url: Url, r: Request): HttpAction[Response] =
+  def dispatch(url: Url, r: Request, options: Options): HttpAction[Response] =
     for {
       netProtocol ← NetProtocol.fromUrl(url)
       address ← fromNetIo(net.lookupAddress(url.host))
@@ -21,8 +22,7 @@ trait Http {
       _ ← fromNetIo(net.write(con, r.render.toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
-      bodySize ← bodySizeFromHeaders(headers)
-      body ← fromNetIo(net.read(con, bodySize))
+      body ← fromNetIo(net.read(con, bodySize(headers, options.maxResponseBodySize)))
       _ ← fromNetIo(net.disconnect(con))
     } yield Response(status, headers, body)
 
@@ -43,11 +43,12 @@ trait Http {
     customHeaders.foldRight(z)((header, headers) ⇒ headers.updated(header.name, header)).values.toList
   }
 
-  private def bodySizeFromHeaders(headers: List[Header]): HttpAction[Int] = either {
-    for {
-      header ← headers.find(_.name == HeaderNames.ContentLength).toRight(HttpError.MissingContentLength)
-      value ← Either.catchNonFatal(header.value.toInt).leftMap(_ ⇒ HttpError.MissingContentLength)
-    } yield value
+  private def bodySize(headers: List[Header], maxValue: Int): Int = {
+    val fromResponse = for {
+      header <- headers.find(_.name == HeaderNames.ContentLength)
+      size <- Try(header.value.toInt).toOption
+    } yield size
+    fromResponse.getOrElse(maxValue).max(maxValue)
   }
 
   private def readHeaders(con: ConnectionId): HttpAction[List[Header]] = {

@@ -19,7 +19,7 @@ class HttpSpec extends Specification with ScalaCheck { def is = s2"""
 
     val url = urlFor(method).getOrElse(throw new RuntimeException("Generating malformed URLs"))
     val request = Request(method, url.path, message)
-    val response = http.dispatch(url, request)
+    val response = http.dispatch(url, request, Options.default)
 
     response must (endIn200Ok and haveSentCorrectHeaders(message.headers) and haveSentCorrectBody(message.body))
 

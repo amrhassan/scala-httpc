@@ -19,8 +19,8 @@ case class Socket private[sockets](socket: JSocket, in: InputStream, out: Output
   def read(length: Int): Either[SocketError, Array[Byte]] =
     catchIoException {
       val buffer = Array.ofDim[Byte](length)
-      val _ = in.read(buffer)
-      buffer
+      val readCount = in.read(buffer)
+      buffer.take(readCount)
     }
 
   /** Writes bytes to the specified socket */
