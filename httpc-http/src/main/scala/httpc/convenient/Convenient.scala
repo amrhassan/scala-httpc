@@ -45,6 +45,8 @@ private [httpc] trait Convenient {
   def run[A](action: Httpc[A]): Either[HttpcError, A] =
     action.run(NetInterpreters.socketsInterpreter)
 
+  implicit def responseOps(response: Response): ResponseOps =
+    ResponseOps(response)
 
   private [httpc] def fromHttpAction[A](a: HttpAction[A]): Httpc[A] =
     Kleisli(interp => a.run(interp).left.map(convenient.HttpError.apply))

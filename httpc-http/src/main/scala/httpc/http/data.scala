@@ -11,6 +11,7 @@ object HeaderNames {
   val ContentLength = "Content-Length"
   val Host = "Host"
   val ContentType = "Content-Type"
+  val ContentEncoding = "Content-Encoding"
 }
 
 /** An HTTP header */
@@ -74,7 +75,6 @@ object Method extends Enum[Method] {
     str.getBytes.toVector
   }
 
-
   case object Get extends Method
   case object Put extends Method
   case object Patch extends Method
@@ -112,12 +112,7 @@ object Status {
 }
 
 /** An HTTP response */
-case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
-
-  /** Decodes the body as UTF-8 text */
-  def text: Option[String] =
-    Either.catchNonFatal(new String(body, "UTF-8")).toOption
-}
+case class Response(status: Status, headers: List[Header], body: Array[Byte])
 
 case class Url(protocol: String, host: String, port: Option[Port], path: Path)
 
