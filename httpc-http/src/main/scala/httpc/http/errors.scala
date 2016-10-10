@@ -16,6 +16,7 @@ object HttpError {
   case object CorruptedContentLength extends HttpError
   case class UnsupportedTransferEncoding(name: String) extends HttpError
   case object UnspecifiedTransferModeError extends HttpError
+  case object CorruptedChunkedResponse extends HttpError
 
   implicit val showHttpError: Show[HttpError] = Show.show(render)
 
@@ -27,5 +28,6 @@ object HttpError {
     case CorruptedContentLength => s"corrupted Content-Length value"
     case UnsupportedTransferEncoding(name) => s"unsupported Transfer-Encoding protocol $name"
     case UnspecifiedTransferModeError => s"unspecified Content-Length or Transfer-Encoding"
+    case CorruptedChunkedResponse => s"corrupted chunked response"
   })
 }

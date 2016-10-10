@@ -1,9 +1,10 @@
 package httpc.http
 
-import httpc.net.{ConnectionId, NetAction}
 import httpc.net
 import cats.implicits._
-import httpc.http.HttpError.CorruptedContentLength
+import httpc.http.HttpError.{CorruptedChunkedResponse, CorruptedContentLength}
+import HttpAction._
+import httpc.net.ConnectionId
 
 private [httpc] sealed trait TransferMode
 private [httpc] case class FixedLengthTransferMode(length: Int) extends TransferMode
@@ -11,27 +12,24 @@ private [httpc] case object UnspecifiedTransferMode extends TransferMode
 
 private [httpc] object ChunkedTransferMode extends TransferMode {
 
-  def readAllChunks(connectionId: ConnectionId): NetAction[Vector[Byte]] =
+  def readAllChunks(connectionId: ConnectionId): HttpAction[Vector[Byte]] =
     readChunkSize(connectionId) >>= { size =>
       if (size > 0)
         for {
-          data <- net.mustRead(connectionId, size)
-          _ <- net.read(connectionId, 2)  // the trailer
+          data <- fromNetIo(net.mustRead(connectionId, size))
+          _ <- fromNetIo(net.read(connectionId, 2))  // the trailer
           next <- readAllChunks(connectionId)
-        } yield data.toVector ++ next
+        } yield data ++ next
       else
-        NetAction.pure(Vector.empty)
+        pure(Vector.empty)
     }
 
-  def readChunkSize(connectionId: ConnectionId): NetAction[Int] = for {
-    header <- net.readUntil(connectionId, trailerHead)
-    _ <- net.read(connectionId, 1)  // rest of trailer
+  def readChunkSize(connectionId: ConnectionId): HttpAction[Int] = for {
+    header <- fromNetIo(net.readUntil(connectionId, '\r'.toByte))
+    _ <- fromNetIo(net.read(connectionId, 1))  // rest of trailer
     sizeHex = net.Bytes.toString(header.init)
-    size = Integer.valueOf(sizeHex, 16)
+    size <- either(Either.catchOnly[NumberFormatException](Integer.valueOf(sizeHex, 16)).left.map(_ => CorruptedChunkedResponse))
   } yield size
-
-  private val trailerHead = '\r'.toByte
-  private val trailer: Vector[Byte] = "\r\n".getBytes.toVector
 
   def fromResponseHeaders(headers: List[Header]): Option[Either[HttpError, TransferMode]] =
     if (headers.contains(Header.transferEncodingCunked))

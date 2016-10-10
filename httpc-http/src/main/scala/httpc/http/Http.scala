@@ -47,7 +47,7 @@ trait Http {
     mode match {
       case UnspecifiedTransferMode => HttpAction.error(UnspecifiedTransferModeError)
       case FixedLengthTransferMode(length) => fromNetIo(net.read(connectionId, length))
-      case ChunkedTransferMode => fromNetIo(ChunkedTransferMode.readAllChunks(connectionId))
+      case ChunkedTransferMode => ChunkedTransferMode.readAllChunks(connectionId)
     }
 
   private def readHeaders(con: ConnectionId): HttpAction[List[Header]] = {
