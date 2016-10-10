@@ -1,12 +1,11 @@
 package httpc.http
 
-import scala.util.Try
 import cats.implicits._
 import HttpAction._
 import httpc.net.{Bytes, ConnectionId, NetInterpreters}
 import httpc.net
 import Render.ops._
-
+import httpc.http.HttpError.UnspecifiedTransferModeError
 
 /** Module API */
 trait Http {
@@ -14,7 +13,7 @@ trait Http {
   val HttpVersion = "HTTP/1.1".getBytes.toVector
 
   /** Dispatches a request yielding a response for it */
-  def dispatch(url: Url, r: Request, options: Options): HttpAction[Response] =
+  def dispatch(url: Url, r: Request): HttpAction[Response] =
     for {
       netProtocol ← NetProtocol.fromUrl(url)
       address ← fromNetIo(net.lookupAddress(url.host))
@@ -22,9 +21,10 @@ trait Http {
       _ ← fromNetIo(net.write(con, r.render.toArray))
       status ← readStatus(con)
       headers ← readHeaders(con)
-      body ← fromNetIo(net.read(con, bodySize(headers, options.maxResponseBodySize)))
+      transferMode <- either(TransferMode.fromResponseHeaders(headers))
+      body <- readBody(con, transferMode)
       _ ← fromNetIo(net.disconnect(con))
-    } yield Response(status, headers, body)
+    } yield Response(status, headers, body.toArray)
 
   /** Builds a request */
   def request[A: ToRequest](method: Method, url: Url, data: A): Request = {
@@ -43,13 +43,12 @@ trait Http {
     customHeaders.foldRight(z)((header, headers) ⇒ headers.updated(header.name, header)).values.toList
   }
 
-  private def bodySize(headers: List[Header], maxValue: Int): Int = {
-    val fromResponse = for {
-      header <- headers.find(_.name == HeaderNames.ContentLength)
-      size <- Try(header.value.toInt).toOption
-    } yield size
-    fromResponse.getOrElse(maxValue).max(maxValue)
-  }
+  private def readBody(connectionId: ConnectionId, mode: TransferMode): HttpAction[Vector[Byte]] =
+    mode match {
+      case UnspecifiedTransferMode => HttpAction.error(UnspecifiedTransferModeError)
+      case FixedLengthTransferMode(length) => fromNetIo(net.read(connectionId, length))
+      case ChunkedTransferMode => fromNetIo(ChunkedTransferMode.readAllChunks(connectionId))
+    }
 
   private def readHeaders(con: ConnectionId): HttpAction[List[Header]] = {
     def readHeader(line: Vector[Byte]): HttpAction[Header] = either {

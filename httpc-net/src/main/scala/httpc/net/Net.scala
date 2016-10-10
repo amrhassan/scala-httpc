@@ -19,7 +19,7 @@ trait Net {
     liftF(ConnectSsl(address, port))
 
   /** Reads data from a connection */
-  def read(connectionId: ConnectionId, length: Int): NetAction[Array[Byte]] =
+  def read(connectionId: ConnectionId, length: Int): NetAction[Vector[Byte]] =
     liftF(Read(connectionId, length))
 
   /** Reads bytes until the specified marker byte and returns all bytes including the marker suffix */
@@ -30,6 +30,18 @@ trait Net {
       else
         readUntil(conId, marker) map (bytes ++ _)
     }
+
+  /** Keeps re-reading until getting the specified amount of bytes */
+  def mustRead(connectionId: ConnectionId, length: Int): NetAction[Vector[Byte]] =
+    if (length == 0)
+      NetAction.pure(Vector.empty)
+    else
+      read(connectionId, length) >>= { got =>
+        if (got.length < length)
+          mustRead(connectionId, length - got.length) map (got ++ _)
+        else
+          NetAction.pure(got)
+      }
 
   /** Writes data to a connection */
   def write(connectionId: ConnectionId, data: Array[Byte]): NetAction[Unit] =

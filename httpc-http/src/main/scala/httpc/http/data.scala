@@ -11,6 +11,7 @@ object HeaderNames {
   val ContentLength = "Content-Length"
   val Host = "Host"
   val ContentType = "Content-Type"
+  val TransferEncoding = "Transfer-Encoding"
 }
 
 /** An HTTP header */
@@ -42,6 +43,9 @@ object Header {
   /** Content-Length header */
   def contentLength(length: Int): Header =
     Header(HeaderNames.ContentLength, length.toString)
+
+  val transferEncodingCunked: Header =
+    Header(HeaderNames.TransferEncoding, "chunked")
 }
 
 /** An HTTP message */
