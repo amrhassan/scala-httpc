@@ -54,7 +54,8 @@ lazy val commonSettings = Seq(
 val `httpc-net` = project
   .settings(commonSettings:_*)
   .settings(
-    name := "httpc-net"
+    name := "httpc-net",
+    libraryDependencies ++= scodecBits
   )
 
 val `httpc-http` = project

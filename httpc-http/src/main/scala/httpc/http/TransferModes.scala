@@ -5,6 +5,7 @@ import cats.implicits._
 import httpc.http.HttpError.{CorruptedChunkedResponse, CorruptedContentLength}
 import HttpAction._
 import httpc.net.ConnectionId
+import scodec.bits.ByteVector
 
 private [httpc] sealed trait TransferMode
 private [httpc] case class FixedLengthTransferMode(length: Int) extends TransferMode
@@ -12,7 +13,7 @@ private [httpc] case object UnspecifiedTransferMode extends TransferMode
 
 private [httpc] object ChunkedTransferMode extends TransferMode {
 
-  def readAllChunks(connectionId: ConnectionId): HttpAction[Vector[Byte]] =
+  def readAllChunks(connectionId: ConnectionId): HttpAction[ByteVector] =
     readChunkSize(connectionId) >>= { size =>
       if (size > 0)
         for {
@@ -21,7 +22,7 @@ private [httpc] object ChunkedTransferMode extends TransferMode {
           next <- readAllChunks(connectionId)
         } yield data ++ next
       else
-        pure(Vector.empty)
+        pure(ByteVector.empty)
     }
 
   def readChunkSize(connectionId: ConnectionId): HttpAction[Int] = for {

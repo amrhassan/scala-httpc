@@ -5,6 +5,7 @@ import cats.free.Free
 import cats.implicits._
 import NetError.ConnectionNotFound
 import httpc.net.sockets.{Addresses, Socket, SocketError}
+import scodec.bits.ByteVector
 
 
 /** Networking operations */
@@ -12,8 +13,8 @@ private [net] trait NetOp[A]
 private [net] case class AddrLookup(hostname: String) extends NetOp[Address]
 private [net] case class Connect(address: Address, port: Port) extends NetOp[ConnectionId]
 private [net] case class ConnectSsl(address: Address, port: Port) extends NetOp[ConnectionId]
-private [net] case class Read(conId: ConnectionId, length: Int) extends NetOp[Vector[Byte]]
-private [net] case class Write(conId: ConnectionId, data: Array[Byte]) extends NetOp[Unit]
+private [net] case class Read(conId: ConnectionId, length: Int) extends NetOp[ByteVector]
+private [net] case class Write(conId: ConnectionId, data: ByteVector) extends NetOp[Unit]
 private [net] case class Disconnect(conId: ConnectionId) extends NetOp[Unit]
 
 
@@ -68,7 +69,7 @@ object NetInterpreters {
         for {
           socket ← conns.get(id).toRight[NetError](ConnectionNotFound(id))
           data ← socket.read(length) leftMap errorTranslate
-        } yield data.toVector
+        } yield data
       case Write(id, data) ⇒
         for {
           socket ← conns.get(id).toRight[NetError](ConnectionNotFound(id))

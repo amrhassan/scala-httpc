@@ -6,11 +6,12 @@ import httpc.net.{Bytes, ConnectionId, NetInterpreters}
 import httpc.net
 import Render.ops._
 import httpc.http.HttpError.UnspecifiedTransferModeError
+import scodec.bits.ByteVector
 
 /** Module API */
 trait Http {
 
-  val HttpVersion = "HTTP/1.1".getBytes.toVector
+  val HttpVersion = Bytes.fromUtf8("HTTP/1.1")
 
   /** Dispatches a request yielding a response for it */
   def dispatch(url: Url, r: Request): HttpAction[Response] =
@@ -18,13 +19,13 @@ trait Http {
       netProtocol ← NetProtocol.fromUrl(url)
       address ← fromNetIo(net.lookupAddress(url.host))
       con ← fromNetIo(netProtocol.connect(address, url.port.getOrElse(netProtocol.defaultPort)))
-      _ ← fromNetIo(net.write(con, r.render.toArray))
+      _ ← fromNetIo(net.write(con, r.render))
       status ← readStatus(con)
       headers ← readHeaders(con)
       transferMode <- either(TransferMode.fromResponseHeaders(headers))
       body <- readBody(con, transferMode)
       _ ← fromNetIo(net.disconnect(con))
-    } yield Response(status, headers, body.toArray)
+    } yield Response(status, headers, body)
 
   /** Builds a request */
   def request[A: ToRequest](method: Method, url: Url, data: A): Request = {
@@ -43,7 +44,7 @@ trait Http {
     customHeaders.foldRight(z)((header, headers) ⇒ headers.updated(header.name, header)).values.toList
   }
 
-  private def readBody(connectionId: ConnectionId, mode: TransferMode): HttpAction[Vector[Byte]] =
+  private def readBody(connectionId: ConnectionId, mode: TransferMode): HttpAction[ByteVector] =
     mode match {
       case UnspecifiedTransferMode => HttpAction.error(UnspecifiedTransferModeError)
       case FixedLengthTransferMode(length) => fromNetIo(net.read(connectionId, length))
@@ -51,8 +52,8 @@ trait Http {
     }
 
   private def readHeaders(con: ConnectionId): HttpAction[List[Header]] = {
-    def readHeader(line: Vector[Byte]): HttpAction[Header] = either {
-      Header.read(line).toRight(HttpError.MalformedHeader(new String(line.toArray).trim))
+    def readHeader(line: ByteVector): HttpAction[Header] = either {
+      Header.read(line).toRight(HttpError.MalformedHeader(Bytes.toString(line).trim))
     }
     readLine(con) >>= { line ⇒
       if (Bytes.isWhitespace(line)) {
@@ -72,7 +73,7 @@ trait Http {
       HttpAction.either(status)
     }
 
-  private def readLine(con: ConnectionId): HttpAction[Vector[Byte]] = fromNetIo {
+  private def readLine(con: ConnectionId): HttpAction[ByteVector] = fromNetIo {
     net.readUntil(con, '\n'.toByte)
   }
 

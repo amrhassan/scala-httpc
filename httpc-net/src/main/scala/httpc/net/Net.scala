@@ -2,6 +2,7 @@ package httpc.net
 
 import cats.free.Free.liftF
 import cats.implicits._
+import scodec.bits.ByteVector
 
 /** Network operations */
 trait Net {
@@ -19,12 +20,12 @@ trait Net {
     liftF(ConnectSsl(address, port))
 
   /** Reads data from a connection */
-  def read(connectionId: ConnectionId, length: Int): NetAction[Vector[Byte]] =
+  def read(connectionId: ConnectionId, length: Int): NetAction[ByteVector] =
     liftF(Read(connectionId, length))
 
   /** Reads bytes until the specified marker byte and returns all bytes including the marker suffix */
-  def readUntil(conId: ConnectionId, marker: Byte): NetAction[Vector[Byte]] =
-    read(conId, 1).map(_.toVector) >>= { bytes ⇒
+  def readUntil(conId: ConnectionId, marker: Byte): NetAction[ByteVector] =
+    read(conId, 1) >>= { bytes ⇒
       if (bytes(0) === marker)
         NetAction.pure(bytes)
       else
@@ -32,19 +33,19 @@ trait Net {
     }
 
   /** Keeps re-reading until getting the specified amount of bytes */
-  def mustRead(connectionId: ConnectionId, length: Int): NetAction[Vector[Byte]] =
+  def mustRead(connectionId: ConnectionId, length: Int): NetAction[ByteVector] =
     if (length == 0)
-      NetAction.pure(Vector.empty)
+      NetAction.pure(ByteVector.empty)
     else
       read(connectionId, length) >>= { got =>
         if (got.length < length)
-          mustRead(connectionId, length - got.length) map (got ++ _)
+          mustRead(connectionId, length - got.length.toInt) map (got ++ _)
         else
           NetAction.pure(got)
       }
 
   /** Writes data to a connection */
-  def write(connectionId: ConnectionId, data: Array[Byte]): NetAction[Unit] =
+  def write(connectionId: ConnectionId, data: ByteVector): NetAction[Unit] =
     liftF(Write(connectionId, data))
 
   /** Disconnects from a connection */

@@ -5,6 +5,8 @@ import httpc.net.{Bytes, Port}
 import enumeratum._
 import Render.ops._
 import Render._
+import scodec.bits.ByteVector
+import httpc.net.ScodecInstances._
 
 
 object HeaderNames {
@@ -20,12 +22,12 @@ case class Header(name: String, value: String)
 object Header {
 
   implicit val renderHeader: Render[Header] = Render { header =>
-    s"${header.name}: ${header.value}".getBytes.toVector
+    Bytes.fromUtf8(s"${header.name}: ${header.value}")
   }
 
   /** Reads a Header from a sequence of bytes */
-  private [http] def read(bytes: Vector[Byte]): Option[Header] = {
-    val line = new String(bytes.toArray)
+  private [http] def read(bytes: ByteVector): Option[Header] = {
+    val line = Bytes.toString(bytes)
     if (line contains ':') {
       val (key, value) = line.splitAt(line.indexOf(':'))
       Some(Header(key.trim, value.drop(1).trim))
@@ -41,7 +43,7 @@ object Header {
     Header(HeaderNames.Host, hostname)
 
   /** Content-Length header */
-  def contentLength(length: Int): Header =
+  def contentLength(length: Long): Header =
     Header(HeaderNames.ContentLength, length.toString)
 
   val transferEncodingCunked: Header =
@@ -49,13 +51,13 @@ object Header {
 }
 
 /** An HTTP message */
-case class Message(headers: List[Header], body: Array[Byte])
+case class Message(headers: List[Header], body: ByteVector)
 
 object Message {
 
   implicit val renderMessage: Render[Message] = Render { message =>
-    val headers = (message.headers map (_.render |+| newline)).foldK |+| newline
-    val body = message.body.toVector
+    val headers = (message.headers map (_.render |+| newline)).combineAll |+| newline
+    val body = message.body
     headers |+| body
   }
 }
@@ -64,8 +66,8 @@ sealed trait Method extends EnumEntry
 
 object Method extends Enum[Method] {
 
-  implicit val methodRender: Render[Method] = Render { method =>
-    val str = method match {
+  implicit val methodRender: Render[Method] =
+    Render.renderUtf8 contramap {
       case Get ⇒ "GET"
       case Put ⇒ "PUT"
       case Patch ⇒ "PATCH"
@@ -75,8 +77,6 @@ object Method extends Enum[Method] {
       case Trace ⇒ "Trace"
       case Head ⇒ "HEAD"
     }
-    str.getBytes.toVector
-  }
 
 
   case object Get extends Method
@@ -94,7 +94,7 @@ object Method extends Enum[Method] {
 case class Path(value: String)
 
 object Path {
-  implicit val pathRender: Render[Path] = Render(_.value.getBytes.toVector)
+  implicit val pathRender: Render[Path] = Render.renderUtf8 contramap (_.value)
 }
 
 /** An HTTP request */
@@ -111,16 +111,16 @@ object Request {
 case class Status(value: Int)
 
 object Status {
-  private [http] def read(bytes: Vector[Byte]): Option[Status] =
+  private [http] def read(bytes: ByteVector): Option[Status] =
     Either.catchNonFatal(Bytes.toString(bytes).toInt).toOption map Status.apply
 }
 
 /** An HTTP response */
-case class Response(status: Status, headers: List[Header], body: Array[Byte]) {
+case class Response(status: Status, headers: List[Header], body: ByteVector) {
 
   /** Decodes the body as UTF-8 text */
   def text: Option[String] =
-    Either.catchNonFatal(new String(body, "UTF-8")).toOption
+    Either.catchNonFatal(Bytes.toString(body)).toOption
 }
 
 case class Url(protocol: String, host: String, port: Option[Port], path: Path)

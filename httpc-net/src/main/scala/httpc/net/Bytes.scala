@@ -1,14 +1,19 @@
 package httpc.net
 
+import scodec.bits.ByteVector
+
 object Bytes {
 
-  def isWhitespace(bytes: Vector[Byte]): Boolean =
+  def fromUtf8(text: String): ByteVector =
+    ByteVector(text.getBytes("UTF-8"))
+
+  def isWhitespace(bytes: ByteVector): Boolean =
     toString(bytes).trim.isEmpty
 
-  def toString(bytes: Vector[Byte]): String =
+  def toString(bytes: ByteVector): String =
     new String(bytes.toArray)
 
-  def split(bytes: Vector[Byte], sep: Byte): Vector[Vector[Byte]] =
+  def split(bytes: ByteVector, sep: Byte): Vector[ByteVector] =
     if (bytes.isEmpty)
       Vector.empty
     else {

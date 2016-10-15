@@ -4,6 +4,7 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Gen._
 import Arbitrary._
 import cats.implicits._
+import scodec.bits.ByteVector
 
 object Arbitraries {
 
@@ -39,9 +40,13 @@ object Arbitraries {
     arbitrary[List[String]] map (segments ⇒ Path("/" + segments.mkString("/")))
   }
 
+  implicit val arbByteVector: Arbitrary[ByteVector] = Arbitrary {
+    arbitrary[Array[Byte]] map ByteVector.apply
+  }
+
   implicit val arbMessage: Arbitrary[Message] = Arbitrary {
     for {
-      body ← arbitrary[Array[Byte]]
+      body ← arbitrary[ByteVector]
       headers =
         (if (body.nonEmpty) List(Header.contentLength(body.length)) else List.empty) |+|
         List(Header.host(hostname))

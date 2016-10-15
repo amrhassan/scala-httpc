@@ -6,6 +6,7 @@ import javax.net.ssl.SSLSocketFactory
 import httpc.net.{Address, Port}
 import httpc.net.sockets.SocketError._
 import cats.implicits._
+import scodec.bits.ByteVector
 
 
 /** A TCP socket */
@@ -16,17 +17,17 @@ case class Socket private[sockets](socket: JSocket, in: InputStream, out: Output
     catchIoException(socket.close())
 
   /** Reads bytes of the specified length from the socket */
-  def read(length: Int): Either[SocketError, Array[Byte]] =
+  def read(length: Int): Either[SocketError, ByteVector] =
     catchIoException {
       val buffer = Array.ofDim[Byte](length)
       val readCount = in.read(buffer)
-      buffer.take(readCount)
+      ByteVector(buffer.take(readCount))
     }
 
   /** Writes bytes to the specified socket */
-  def write(bytes: Array[Byte]): Either[SocketError, Unit] =
+  def write(bytes: ByteVector): Either[SocketError, Unit] =
     catchIoException {
-      out.write(bytes)
+      out.write(bytes.toArray)
       out.flush()
     }
 }

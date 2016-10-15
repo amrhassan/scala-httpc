@@ -4,11 +4,13 @@ import java.nio.ByteBuffer
 import com.github.marklister.base64.Base64
 import httpc._
 import httpc.http.Arbitraries._
+import httpc.net.Bytes
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.jawn._
 import org.specs2.matcher.Matcher
 import org.specs2.{ScalaCheck, Specification}
+import scodec.bits.ByteVector
 
 
 class HttpSpec extends Specification with ScalaCheck { def is = s2"""
@@ -30,8 +32,8 @@ class HttpSpec extends Specification with ScalaCheck { def is = s2"""
     case _ ⇒ false
   } (err="Response is not 200")
 
-  def haveSentCorrectBody(body: Array[Byte]) = requestMetadataMatcher { bin ⇒
-    bin.decodedDataBytes.sameElements(body)
+  def haveSentCorrectBody(body: ByteVector) = requestMetadataMatcher { bin ⇒
+    bin.decodedDataBytes === body
   } ("Request did not send correct body")
 
   def haveSentCorrectHeaders(headers: List[Header]) = requestMetadataMatcher { bin ⇒
@@ -62,18 +64,18 @@ class HttpSpec extends Specification with ScalaCheck { def is = s2"""
     headers: Map[String, String],
     data: String
   ) {
-    def decodedDataBytes: Array[Byte] =
+    def decodedDataBytes: ByteVector =
       if (data.isEmpty)
-        Array.empty
+        ByteVector.empty
       else if (data.startsWith("data:application/octet-stream;base64,")) {
         val s = data.split(',')(1)
-        Base64.Decoder(s).toByteArray
+        ByteVector(Base64.Decoder(s).toByteArray)
       } else
-        data.getBytes
+        Bytes.fromUtf8(data)
   }
 
   object RequestMetadata {
-    def parse(bytes: Array[Byte]): Decoder.Result[RequestMetadata] =
-      parseByteBuffer(ByteBuffer.wrap(bytes)).getOrElse(Json.Null).as[RequestMetadata]
+    def parse(bytes: ByteVector): Decoder.Result[RequestMetadata] =
+      parseByteBuffer(ByteBuffer.wrap(bytes.toArray)).getOrElse(Json.Null).as[RequestMetadata]
   }
 }
