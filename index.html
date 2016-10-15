@@ -7,8 +7,7 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -16,72 +15,57 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1 class="header">Scala-httpc</h1>
-        <p class="header">HTTP Client for Scala</p>
+        <h1>Scala-httpc</h1>
+        <p>HTTP Client for Scala</p>
+
+        <p class="view"><a href="https://github.com/amrhassan/scala-httpc">View the Project on GitHub <small>amrhassan/scala-httpc</small></a></p>
+
 
         <ul>
-          <li class="download"><a class="buttons" href="https://github.com/amrhassan/scala-httpc/zipball/master">Download ZIP</a></li>
-          <li class="download"><a class="buttons" href="https://github.com/amrhassan/scala-httpc/tarball/master">Download TAR</a></li>
-          <li><a class="buttons github" href="https://github.com/amrhassan/scala-httpc">View On GitHub</a></li>
+          <li><a href="https://github.com/amrhassan/scala-httpc/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/amrhassan/scala-httpc/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/amrhassan/scala-httpc">View On <strong>GitHub</strong></a></li>
         </ul>
-
-        <p class="header">This project is maintained by <a class="header name" href="https://github.com/amrhassan">amrhassan</a></p>
-
-
       </header>
       <section>
         <h1>
 <a id="scala-httpc" class="anchor" href="#scala-httpc" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>scala-httpc</h1>
 
-<p><a href="https://travis-ci.org/amrhassan/scala-httpc"><img src="https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master" alt="Build Status"></a>
-<a href="https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc"><img src="https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/httpc/badge.svg" alt="Maven Central"></a></p>
+<p><a href="https://travis-ci.org/amrhassan/scala-httpc"><img src="https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master" alt="Build Status"></a></p>
 
-<p>HTTP Client for Scala built using functional programming and <a href="https://github.com/typelevel/cats">cats</a></p>
+<p>A reasonably minimal HTTP Client for Scala built using purely functional programming and <a href="https://github.com/typelevel/cats">cats</a></p>
+
+<p>Optional support for JSON payloads is available via <a href="https://github.com/travisbrown/circe">Circe</a>.</p>
 
 <h1>
-<a id="usage-example" class="anchor" href="#usage-example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage Example</h1>
+<a id="quick-usage" class="anchor" href="#quick-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick Usage</h1>
 
-<pre><code>libraryDependencies += "io.github.amrhassan" %% "httpc" % "0.1.6"
-</code></pre>
+<div class="highlight highlight-source-scala"><pre>resolvers <span class="pl-k">+</span><span class="pl-k">=</span> <span class="pl-en">Resolver</span>.sonatypeRepo(<span class="pl-s"><span class="pl-pds">"</span>snapshots<span class="pl-pds">"</span></span>)
+libraryDependencies <span class="pl-k">++</span><span class="pl-k">=</span> <span class="pl-en">Seq</span>(<span class="pl-s"><span class="pl-pds">"</span>io.github.amrhassan<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>httpc<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-s"><span class="pl-pds">"</span>0.3.0-SNAPSHOT<span class="pl-pds">"</span></span>)</pre></div>
 
-<div class="highlight highlight-source-scala"><pre><span class="pl-k">import</span> <span class="pl-v">httpc.</span><span class="pl-v">_</span>
-<span class="pl-k">import</span> <span class="pl-v">scala.concurrent.ExecutionContext.Implicits.</span><span class="pl-v">global</span>
-<span class="pl-k">import</span> <span class="pl-v">cats.implicits.</span><span class="pl-v">_</span>
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">import</span> <span class="pl-v">httpc.all.</span><span class="pl-v">_</span>
 
 <span class="pl-k">object</span> <span class="pl-en">Sandbox</span> <span class="pl-k">extends</span> <span class="pl-e">App</span> {
 
-  get(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/get<span class="pl-pds">"</span></span>) map { response <span class="pl-k">⇒</span>
-    println(response.status)
-    println(response.text)
-  }
+  <span class="pl-c">// Description of a PUT request yielding a response</span>
+  <span class="pl-k">val</span> <span class="pl-en">command</span> <span class="pl-k">=</span> put(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/put<span class="pl-pds">"</span></span>, data <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>OK Computer<span class="pl-pds">"</span></span>)
 
-  put(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/put<span class="pl-pds">"</span></span>, data <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>OK Computer<span class="pl-pds">"</span></span>) map { response <span class="pl-k">⇒</span>
-    println(response.status)
-    println(response.text)
+  <span class="pl-c">// Run the command into an Either[HttpError, Response]</span>
+  run(command) <span class="pl-k">match</span> {
+    <span class="pl-k">case</span> <span class="pl-en">Left</span>(error) <span class="pl-k">⇒</span> println(error)
+    <span class="pl-k">case</span> <span class="pl-en">Right</span>(response) <span class="pl-k">⇒</span>
+      println(response.status)
+      println(response.text)
+      println(response.json)
   }
-
-  <span class="pl-c">// Because all APIs are non-blocking</span>
-  <span class="pl-en">Thread</span>.sleep(<span class="pl-c1">10000</span>)
 }</pre></div>
-
-<h1>
-<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>TODO</h1>
-
-<ul>
-<li>[X] Safe TCP sockets API</li>
-<li>[X] Minimal HTTP data structures and protocol</li>
-<li>[X] Convenience public library API</li>
-<li>[ ] HTTPS support</li>
-<li>[ ] Optional JSON Support</li>
-<li>[ ] Lots and lots of property tests</li>
-<li>[ ] Benchmarks?</li>
-</ul>
       </section>
       <footer>
-        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+        <p>This project is maintained by <a href="https://github.com/amrhassan">amrhassan</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-		
+    <script src="javascripts/scale.fix.js"></script>
+    
   </body>
 </html>
