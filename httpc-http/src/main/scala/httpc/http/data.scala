@@ -15,6 +15,7 @@ trait HeaderNames {
   val ContentType = "Content-Type"
   val TransferEncoding = "Transfer-Encoding"
   val CacheControl = "Cache-Control"
+  val UserAgent = "User-Agent"
 }
 
 object HeaderNames extends HeaderNames
@@ -57,6 +58,9 @@ trait HeaderConstruction {
 
   val cacheControlNoCache: Header =
     Header(HeaderNames.CacheControl, "no-cache")
+
+  def userAgent(value: String): Header =
+    Header(HeaderNames.UserAgent, value)
 }
 
 /** An HTTP message */
