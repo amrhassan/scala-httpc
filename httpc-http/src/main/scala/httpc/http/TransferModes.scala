@@ -33,7 +33,7 @@ private [httpc] object ChunkedTransferMode extends TransferMode {
   } yield size
 
   def fromResponseHeaders(headers: List[Header]): Option[Either[HttpError, TransferMode]] =
-    if (headers.contains(Header.transferEncodingCunked))
+    if (headers.contains(Header.transferEncodingChunked))
       Either.right(ChunkedTransferMode).some
     else None
 }

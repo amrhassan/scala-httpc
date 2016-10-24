@@ -46,7 +46,7 @@ object Header {
   def contentLength(length: Long): Header =
     Header(HeaderNames.ContentLength, length.toString)
 
-  val transferEncodingCunked: Header =
+  val transferEncodingChunked: Header =
     Header(HeaderNames.TransferEncoding, "chunked")
 }
 

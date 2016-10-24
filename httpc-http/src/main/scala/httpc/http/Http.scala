@@ -28,11 +28,11 @@ trait Http {
     } yield Response(status, headers, body)
 
   /** Builds a request */
-  def request[A: ToRequest](method: Method, url: Url, data: A): Request = {
+  def request[A: ToRequest](method: Method, url: Url, data: A, headers: List[Header]): Request = {
     val dataBytes = ToRequest[A].body(data)
 
     val requiredHeaders = List(Header.host(url.host), Header.contentLength(dataBytes.length))
-    val customHeaders = ToRequest[A].fallbackHeaders
+    val customHeaders = ToRequest[A].fallbackHeaders ++ headers
 
     val message = Message(requestHeaders(requiredHeaders, customHeaders), dataBytes)
     Request(method, url.path, message)
