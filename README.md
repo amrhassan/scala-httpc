@@ -18,7 +18,9 @@ import httpc.all._
 object Sandbox extends App {
 
   // Description of a PUT request yielding a response
-  val command = put("http://httpbin.org/put", data = "OK Computer")
+  val command = put("http://httpbin.org/put", 
+      data = "OK Computer",
+      headers = List(cacheControlNoCache))
 
   // Run the command into an Either[HttpError, Response]
   run(command) match {

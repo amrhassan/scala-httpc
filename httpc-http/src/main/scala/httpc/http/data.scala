@@ -9,17 +9,20 @@ import scodec.bits.ByteVector
 import httpc.net.ScodecInstances._
 
 
-object HeaderNames {
+trait HeaderNames {
   val ContentLength = "Content-Length"
   val Host = "Host"
   val ContentType = "Content-Type"
   val TransferEncoding = "Transfer-Encoding"
+  val CacheControl = "Cache-Control"
 }
+
+object HeaderNames extends HeaderNames
 
 /** An HTTP header */
 case class Header(name: String, value: String)
 
-object Header {
+object Header extends HeaderConstruction {
 
   implicit val renderHeader: Render[Header] = Render { header =>
     Bytes.fromUtf8(s"${header.name}: ${header.value}")
@@ -33,8 +36,11 @@ object Header {
       Some(Header(key.trim, value.drop(1).trim))
     } else None
   }
+}
 
-  /** Content-Type header */
+trait HeaderConstruction {
+
+   /** Content-Type header */
   def contentType(value: String): Header =
     Header(HeaderNames.ContentType, value)
 
@@ -48,6 +54,9 @@ object Header {
 
   val transferEncodingChunked: Header =
     Header(HeaderNames.TransferEncoding, "chunked")
+
+  val cacheControlNoCache: Header =
+    Header(HeaderNames.CacheControl, "no-cache")
 }
 
 /** An HTTP message */
