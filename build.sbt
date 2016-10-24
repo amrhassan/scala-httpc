@@ -12,7 +12,7 @@ lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
   version := "0.3.0-SNAPSHOT",
   scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-M5"),
+  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-RC2"),
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.8.0"),
   addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full),
@@ -29,6 +29,9 @@ lazy val commonSettings = Seq(
     "-language:implicitConversions"
   ),
   scalacOptions in Test ++= Seq("-Yrangepos"),
+  scalacOptions in (Compile, doc) ++= Seq(
+    "-no-link-warnings" // Suppresses problems with Scaladoc @throws links
+  ),
   pomExtra := (
     <url>https://amrhassan.github.io/scala-httpc/</url>
       <licenses>
