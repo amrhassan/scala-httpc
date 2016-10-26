@@ -12,35 +12,35 @@ private [httpc] trait Convenient extends HeaderNames with HeaderConstruction {
 
   type Httpc[A] = Kleisli[Either[HttpcError, ?], net.Interpreter, A]
 
-  def request[A: Entity, B: ToHeader](method: Method, url: String, data: A = "", headers: Traversable[B] = List.empty): Httpc[Response] =
+  def request[A: Entity, B: ToHeader](method: Method, url: String, data: A = "", headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     for {
       goodUrl ← fromEither(Url.parse(url).toRight[HttpcError](MalformedUrl(url)))
       request = http.request(method, goodUrl, data, headers.map(b => ToHeader[B].toHeader(b)).toList)
       response ← fromHttpAction(dispatch(goodUrl, request))
     } yield response
 
-  def get[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def get[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Get, url, data, headers)
 
-  def put[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def put[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Put, url, data, headers)
 
-  def patch[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def patch[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Patch, url, data, headers)
 
-  def head[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def head[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Head, url, data, headers)
 
-  def post[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def post[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Post, url, data, headers)
 
-  def delete[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def delete[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Delete, url, data, headers)
 
-  def trace[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def trace[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Trace, url, data, headers)
 
-  def options[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty): Httpc[Response] =
+  def options[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     request(Method.Options, url, data, headers)
 
   def run[A](action: Httpc[A]): Either[HttpcError, A] =
