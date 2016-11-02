@@ -36,8 +36,8 @@ class HttpSpec extends Specification with ScalaCheck { def is = s2"""
     bin.decodedDataBytes === body
   } ("Request did not send correct body")
 
-  def haveSentCorrectHeaders(headers: List[Header]) = requestMetadataMatcher { bin ⇒
-    headers forall { header ⇒
+  def haveSentCorrectHeaders(headers: Headers) = requestMetadataMatcher { bin ⇒
+    headers.toList forall { header ⇒
       bin.headers(header.name) == header.value
     }
   } ("Request did not send all the headers")

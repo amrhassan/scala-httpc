@@ -10,7 +10,7 @@ trait Entity[A] {
   def body(a: A): ByteVector
 
   /** Fallback headers in case they are not defined in the request */
-  def fallbackHeaders: List[Header]
+  def fallbackHeaders: Headers
 }
 
 object Entity {
@@ -20,7 +20,7 @@ object Entity {
 
   def apply[A](headers: Header*)(f: (A ⇒ ByteVector)): Entity[A] = new Entity[A] {
     def body(a: A): ByteVector = f(a)
-    def fallbackHeaders: List[Header] = headers.toList
+    def fallbackHeaders: Headers = Headers(headers)
   }
 
   implicit val toRequestUtf8: Entity[String] =

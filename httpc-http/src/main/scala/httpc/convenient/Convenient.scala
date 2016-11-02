@@ -14,9 +14,9 @@ private [httpc] trait Convenient extends HeaderNames with HeaderConstruction {
 
   def request[A: Entity, B: ToHeader](method: Method, url: String, data: A = "", headers: Traversable[B] = List.empty[Header]): Httpc[Response] =
     for {
-      goodUrl ← fromEither(Url.parse(url).toRight[HttpcError](MalformedUrl(url)))
-      request = http.request(method, goodUrl, data, headers.map(b => ToHeader[B].toHeader(b)).toList)
-      response ← fromHttpAction(dispatch(goodUrl, request))
+      goodUrl <- fromEither(Url.parse(url).toRight[HttpcError](MalformedUrl(url)))
+      request = http.buildRequest(method, goodUrl, data, Headers(headers.map(ToHeader[B].toHeader)))
+      response <- fromHttpAction(dispatch(goodUrl, request))
     } yield response
 
   def get[A: Entity, B: ToHeader](url: String, data: A = ByteVector.empty, headers: Traversable[B] = List.empty[Header]): Httpc[Response] =

@@ -5,6 +5,7 @@ import org.scalacheck.Gen._
 import Arbitrary._
 import cats.implicits._
 import scodec.bits.ByteVector
+import cats.implicits._
 
 object Arbitraries {
 
@@ -48,8 +49,8 @@ object Arbitraries {
     for {
       body ← arbitrary[ByteVector]
       headers =
-        (if (body.nonEmpty) List(Header.contentLength(body.length)) else List.empty) |+|
-        List(Header.host(hostname))
+        (if (body.nonEmpty) Headers(Header.contentLength(body.length)) else Headers.empty) |+|
+        Headers(Header.host(hostname))
     } yield Message(headers, body)
   }
 }

@@ -5,8 +5,10 @@ import httpc.net.{Bytes, Port}
 import enumeratum._
 import Render.ops._
 import Render._
+import cats.Monoid
 import scodec.bits.ByteVector
 import httpc.net.ScodecInstances._
+import cats.implicits._
 
 
 trait HeaderNames {
@@ -63,13 +65,39 @@ trait HeaderConstruction {
     Header(HeaderNames.UserAgent, value)
 }
 
+case class Headers private(data: Map[String, Header]) {
+
+  def overwriteWith(other: Headers): Headers =
+    Headers(data ++ other.data)
+
+  lazy val toList: List[Header] =
+    data.values.toList
+}
+
+object Headers {
+
+  def apply(headers: Header*): Headers =
+    Headers(headers)
+
+  def apply(headers: TraversableOnce[Header]): Headers =
+    Headers(headers.map(h => (h.name, h)).toMap)
+
+  implicit val monoidHeaders: Monoid[Headers] = new Monoid[Headers] {
+    val empty: Headers = Headers.empty
+    def combine(x: Headers, y: Headers): Headers = Headers(x.toList |+| y.toList)
+  }
+
+  val empty: Headers =
+    Headers()
+}
+
 /** An HTTP message */
-case class Message(headers: List[Header], body: ByteVector)
+case class Message(headers: Headers, body: ByteVector)
 
 object Message {
 
   implicit val renderMessage: Render[Message] = Render { message =>
-    val headers = (message.headers map (_.render |+| newline)).combineAll |+| newline
+    val headers = (message.headers.toList map (_.render |+| newline)).combineAll |+| newline
     val body = message.body
     headers |+| body
   }

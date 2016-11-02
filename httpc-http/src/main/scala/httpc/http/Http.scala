@@ -16,26 +16,35 @@ trait Http {
   /** Dispatches a request yielding a response for it */
   def dispatch(url: Url, r: Request): HttpAction[Response] =
     for {
-      netProtocol ← NetProtocol.fromUrl(url)
-      address ← fromNetIo(net.lookupAddress(url.host))
-      con ← fromNetIo(netProtocol.connect(address, url.port.getOrElse(netProtocol.defaultPort)))
-      _ ← fromNetIo(net.write(con, r.render))
-      status ← readStatus(con)
-      headers ← readHeaders(con)
+      con <- sendRequest(url, r)
+      response <- receiveResponse(con)
+      _ <- fromNetIo(net.disconnect(con))
+    } yield response
+
+  /** Sends the given request and returns the [[ConnectionId]] of the connection */
+  private [httpc] def sendRequest(url: Url, r: Request): HttpAction[ConnectionId] =
+    for {
+      netProtocol <- NetProtocol.fromUrl(url)
+      address <- fromNetIo(net.lookupAddress(url.host))
+      con <- fromNetIo(netProtocol.connect(address, url.port.getOrElse(netProtocol.defaultPort)))
+      _ <- fromNetIo(net.write(con, r.render))
+    } yield con
+
+  private [httpc] def receiveResponse(connectionId: ConnectionId): HttpAction[Response] =
+    for {
+      status <- receiveStatus(connectionId)
+      headers <- receiveHeaders(connectionId)
       transferMode <- either(TransferMode.fromResponseHeaders(headers))
-      body <- readBody(con, transferMode)
-      _ ← fromNetIo(net.disconnect(con))
+      body <- readBody(connectionId, transferMode)
     } yield Response(status, headers, body)
 
-  /** Builds a request */
-  def request[A: Entity](method: Method, url: Url, data: A, headers: List[Header]): Request = {
-    val dataBytes = Entity[A].body(data)
+  def buildRequest[A: Entity](method: Method, url: Url, data: A, userHeaders: Headers): Request = {
+    val body = Entity[A].body(data)
+    val requiredHeaders = Headers(Header.host(url.host), Header.contentLength(body.length))
 
-    val requiredHeaders = List(Header.host(url.host), Header.contentLength(dataBytes.length))
-    val customHeaders = Entity[A].fallbackHeaders ++ headers
+    val headers = requiredHeaders overwriteWith (Entity[A].fallbackHeaders |+| userHeaders)
 
-    val message = Message(requestHeaders(requiredHeaders, customHeaders), dataBytes)
-    Request(method, url.path, message)
+    Request(method, url.path, Message(headers, body))
   }
 
   private def requestHeaders(requiredHeaders: List[Header], customHeaders: List[Header]): List[Header] = {
@@ -51,29 +60,29 @@ trait Http {
       case ChunkedTransferMode => ChunkedTransferMode.readAllChunks(connectionId)
     }
 
-  private def readHeaders(con: ConnectionId): HttpAction[List[Header]] = {
+  private def receiveHeaders(con: ConnectionId): HttpAction[List[Header]] = {
     def readHeader(line: ByteVector): HttpAction[Header] = either {
       Header.read(line).toRight(HttpError.MalformedHeader(Bytes.toString(line).trim))
     }
-    readLine(con) >>= { line ⇒
+    receiveLine(con) >>= { line ⇒
       if (Bytes.isWhitespace(line)) {
         HttpAction.pure(List.empty)
       } else {
         readHeader(line) >>= { header ⇒
-          readHeaders(con) map (header :: _)
+          receiveHeaders(con) map (header :: _)
         }
       }
     }
   }
 
-  private def readStatus(con: ConnectionId): HttpAction[Status] =
-    readLine(con) >>= { line ⇒
+  private [httpc] def receiveStatus(con: ConnectionId): HttpAction[Status] =
+    receiveLine(con) >>= { line ⇒
       val parts = Bytes.split(line, ' '.toByte)
       val status = Status.read(parts(1)).toRight(HttpError.MalformedStatus(Bytes.toString(line).trim))
       HttpAction.either(status)
     }
 
-  private def readLine(con: ConnectionId): HttpAction[ByteVector] = fromNetIo {
+  private def receiveLine(con: ConnectionId): HttpAction[ByteVector] = fromNetIo {
     net.readUntil(con, '\n'.toByte)
   }
 
