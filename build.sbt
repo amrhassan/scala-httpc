@@ -10,7 +10,6 @@ val commonDeps =
 
 lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
-  version := "0.3.0-SNAPSHOT",
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-RC2"),
   libraryDependencies ++= commonDeps,
