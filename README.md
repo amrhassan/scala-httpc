@@ -2,7 +2,6 @@
 [![Build Status](https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master)](https://travis-ci.org/amrhassan/scala-httpc)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/scala-httpc_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/scala-httpc_2.11)
 
-
 A reasonably minimal HTTP Client for Scala built using purely functional programming and [cats](https://github.com/typelevel/cats)
 
 Optional support for JSON payloads is available via [Circe](https://github.com/travisbrown/circe).
@@ -10,7 +9,6 @@ Optional support for JSON payloads is available via [Circe](https://github.com/t
 # Quick Usage #
 
 ```sbt
-resolvers += Resolver.sonatypeRepo("snapshots")
 libraryDependencies ++= Seq("io.github.amrhassan" %% "httpc" % "0.3.0-RC1")
 ```
 
