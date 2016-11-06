@@ -11,9 +11,9 @@ val commonDeps =
 lazy val commonSettings = Seq(
   organization := "io.github.amrhassan",
   scalaVersion := "2.11.8",
-  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-RC2"),
+  crossScalaVersions := Seq("2.11.8", "2.12.0"),
   libraryDependencies ++= commonDeps,
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.8.0"),
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
   addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   publishArtifact in Test := false,
