@@ -9,7 +9,7 @@ trait CirceSupport {
 
   implicit class ResponseWithJson(response: Response) {
     def json: Either[ParsingFailure, Json] =
-      parseByteBuffer(response.body.toByteBuffer).toEither
+      parseByteBuffer(response.body.toByteBuffer)
   }
 
   implicit val toRequestJson: Entity[Json] =

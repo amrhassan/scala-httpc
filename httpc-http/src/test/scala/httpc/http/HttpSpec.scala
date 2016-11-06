@@ -11,6 +11,7 @@ import io.circe.jawn._
 import org.specs2.matcher.Matcher
 import org.specs2.{ScalaCheck, Specification}
 import scodec.bits.ByteVector
+import cats.implicits._
 
 
 class HttpSpec extends Specification with ScalaCheck { def is = s2"""
