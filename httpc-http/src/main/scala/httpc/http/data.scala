@@ -169,7 +169,7 @@ case class Url(protocol: String, host: String, port: Option[Port], path: Path)
 object Url {
   def parse(url: String): Option[Url] =
     Either.catchNonFatal(new java.net.URL(url)).toOption map { parsed ⇒
-      val path = parsed.getPath
+      val path = parsed.getFile
       Url(parsed.getProtocol, parsed.getHost, Port.fromInt(parsed.getPort), Path(if (path.isEmpty) "/" else path))
     }
 }
