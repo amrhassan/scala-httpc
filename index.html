@@ -31,7 +31,8 @@
         <h1>
 <a id="scala-httpc" class="anchor" href="#scala-httpc" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>scala-httpc</h1>
 
-<p><a href="https://travis-ci.org/amrhassan/scala-httpc"><img src="https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master" alt="Build Status"></a></p>
+<p><a href="https://travis-ci.org/amrhassan/scala-httpc"><img src="https://travis-ci.org/amrhassan/scala-httpc.svg?branch=master" alt="Build Status"></a>
+<a href="https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/scala-httpc_2.11"><img src="https://maven-badges.herokuapp.com/maven-central/io.github.amrhassan/scala-httpc_2.11/badge.svg" alt="Maven Central"></a></p>
 
 <p>A reasonably minimal HTTP Client for Scala built using purely functional programming and <a href="https://github.com/typelevel/cats">cats</a></p>
 
@@ -40,15 +41,16 @@
 <h1>
 <a id="quick-usage" class="anchor" href="#quick-usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Quick Usage</h1>
 
-<div class="highlight highlight-source-scala"><pre>resolvers <span class="pl-k">+</span><span class="pl-k">=</span> <span class="pl-en">Resolver</span>.sonatypeRepo(<span class="pl-s"><span class="pl-pds">"</span>snapshots<span class="pl-pds">"</span></span>)
-libraryDependencies <span class="pl-k">++</span><span class="pl-k">=</span> <span class="pl-en">Seq</span>(<span class="pl-s"><span class="pl-pds">"</span>io.github.amrhassan<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>httpc<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-s"><span class="pl-pds">"</span>0.3.0-SNAPSHOT<span class="pl-pds">"</span></span>)</pre></div>
+<div class="highlight highlight-source-scala"><pre>libraryDependencies <span class="pl-k">++</span><span class="pl-k">=</span> <span class="pl-en">Seq</span>(<span class="pl-s"><span class="pl-pds">"</span>io.github.amrhassan<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>httpc<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-s"><span class="pl-pds">"</span>0.3.0-RC1<span class="pl-pds">"</span></span>)</pre></div>
 
 <div class="highlight highlight-source-scala"><pre><span class="pl-k">import</span> <span class="pl-v">httpc.all.</span><span class="pl-v">_</span>
 
 <span class="pl-k">object</span> <span class="pl-en">Sandbox</span> <span class="pl-k">extends</span> <span class="pl-e">App</span> {
 
   <span class="pl-c">// Description of a PUT request yielding a response</span>
-  <span class="pl-k">val</span> <span class="pl-en">command</span> <span class="pl-k">=</span> put(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/put<span class="pl-pds">"</span></span>, data <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>OK Computer<span class="pl-pds">"</span></span>)
+  <span class="pl-k">val</span> <span class="pl-en">command</span> <span class="pl-k">=</span> put(<span class="pl-s"><span class="pl-pds">"</span>http://httpbin.org/put<span class="pl-pds">"</span></span>, 
+      data <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>OK Computer<span class="pl-pds">"</span></span>,
+      headers <span class="pl-k">=</span> <span class="pl-en">List</span>(cacheControlNoCache))
 
   <span class="pl-c">// Run the command into an Either[HttpError, Response]</span>
   run(command) <span class="pl-k">match</span> {
