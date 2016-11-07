@@ -3,6 +3,7 @@ import Dependencies._
 
 val org = "io.github.amrhassan"
 sonatypeProfileName := org
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 val commonDeps =
   cats ++
