@@ -1,6 +1,9 @@
 
 import Dependencies._
 
+val org = "io.github.amrhassan"
+sonatypeProfileName := org
+
 val commonDeps =
   cats ++
   scalaCheck ++
@@ -9,7 +12,7 @@ val commonDeps =
   simulacrum
 
 lazy val commonSettings = Seq(
-  organization := "io.github.amrhassan",
+  organization := org,
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.11.8", "2.12.0"),
   libraryDependencies ++= commonDeps,
