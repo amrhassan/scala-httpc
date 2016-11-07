@@ -24,8 +24,8 @@ object Sandbox extends App {
 
   // Run the command into an Either[HttpError, Response]
   run(command) match {
-    case Left(error) ⇒ println(error)
-    case Right(response) ⇒
+    case Left(error) => println(error)
+    case Right(response) =>
       println(response.status)
       println(response.text)
       println(response.json)
