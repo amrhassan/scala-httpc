@@ -5,7 +5,7 @@ import httpc.net.{Bytes, Port}
 import enumeratum._
 import Render.ops._
 import Render._
-import cats.Monoid
+import cats.{Monoid, Show}
 import scodec.bits.ByteVector
 import httpc.net.ScodecInstances._
 import cats.implicits._
@@ -132,19 +132,23 @@ object Method extends Enum[Method] {
   val values: Seq[Method] = findValues
 }
 
-case class Path(value: String)
+case class Resource(path: Option[String] = None, query: Option[String] = None, fragment: Option[String] = None)
 
-object Path {
-  implicit val pathRender: Render[Path] = Render.renderUtf8 contramap (_.value)
+object Resource {
+  implicit val renderPath: Render[Resource] = Render.renderUtf8 contramap (_.show)
+  implicit val showPath: Show[Resource] = Show.show {
+    case Resource(path, query, fragment) =>
+      path.getOrElse("/") |+| query.map("?" |+| _).getOrElse("") |+| fragment.map("#" |+| _).getOrElse("")
+  }
 }
 
 /** An HTTP request */
-case class Request(method: Method, path: Path, message: Message)
+case class Request(method: Method, resource: Resource, message: Message)
 
 object Request {
 
   implicit val renderRequest: Render[Request] = Render { r =>
-    r.method.render |+| space |+| r.path.render |+| space |+| HttpVersion |+| newline |+|
+    r.method.render |+| space |+| r.resource.render |+| space |+| HttpVersion |+| newline |+|
       r.message.render
   }
 }
@@ -164,12 +168,25 @@ case class Response(status: Status, headers: List[Header], body: ByteVector) {
     Either.catchNonFatal(Bytes.toString(body)).toOption
 }
 
-case class Url(protocol: String, host: String, port: Option[Port], path: Path)
+case class Url(protocol: String, auth: Option[String], host: String, port: Option[Port], resource: Resource)
 
 object Url {
   def parse(url: String): Option[Url] =
     Either.catchNonFatal(new java.net.URL(url)).toOption map { parsed ⇒
-      val path = parsed.getFile
-      Url(parsed.getProtocol, parsed.getHost, Port.fromInt(parsed.getPort), Path(if (path.isEmpty) "/" else path))
+      val resource = Resource(
+        Option(parsed.getPath),
+        Option(parsed.getQuery),
+        Option(parsed.getRef)
+      )
+      Url(parsed.getProtocol, Option(parsed.getUserInfo), parsed.getHost, Port.fromInt(parsed.getPort), resource)
     }
+
+  implicit val showUrl: Show[Url] = Show.show {
+    case Url(protocol, auth, host, port, resource) =>
+      (protocol |+| "://")                            |+|
+      auth.map(_ |+| "@").getOrElse("")               |+|
+      host                                            |+|
+      port.map(":" |+| _.show.toString).getOrElse("") |+|
+      resource.show
+  }
 }

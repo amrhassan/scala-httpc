@@ -44,13 +44,7 @@ trait Http {
 
     val headers = requiredHeaders overwriteWith (Entity[A].fallbackHeaders |+| userHeaders)
 
-    Request(method, url.path, Message(headers, body))
-  }
-
-  private def requestHeaders(requiredHeaders: List[Header], customHeaders: List[Header]): List[Header] = {
-    // Required headers overridden by custom headers
-    val z = requiredHeaders.map(h ⇒ (h.name, h)).toMap
-    customHeaders.foldRight(z)((header, headers) ⇒ headers.updated(header.name, header)).values.toList
+    Request(method, url.resource, Message(headers, body))
   }
 
   private def readBody(connectionId: ConnectionId, mode: TransferMode): HttpAction[ByteVector] =
