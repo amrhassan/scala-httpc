@@ -3,7 +3,6 @@ import Dependencies._
 
 val org = "io.github.amrhassan"
 sonatypeProfileName := org
-releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 val commonDeps =
   cats ++
@@ -35,6 +34,7 @@ lazy val commonSettings = Seq(
   scalacOptions in (Compile, doc) ++= Seq(
     "-no-link-warnings" // Suppresses problems with Scaladoc @throws links
   ),
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   pomExtra := (
     <url>https://amrhassan.github.io/scala-httpc/</url>
       <licenses>
