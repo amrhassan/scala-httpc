@@ -54,16 +54,16 @@ trait Http {
       case ChunkedTransferMode => ChunkedTransferMode.readAllChunks(connectionId)
     }
 
-  private def receiveHeaders(con: ConnectionId): HttpAction[List[Header]] = {
+  private [httpc] def receiveHeaders(con: ConnectionId): HttpAction[Headers] = {
     def readHeader(line: ByteVector): HttpAction[Header] = either {
       Header.read(line).toRight(HttpError.MalformedHeader(Bytes.toString(line).trim))
     }
     receiveLine(con) >>= { line ⇒
       if (Bytes.isWhitespace(line)) {
-        HttpAction.pure(List.empty)
+        HttpAction.pure(Headers.empty)
       } else {
         readHeader(line) >>= { header ⇒
-          receiveHeaders(con) map (header :: _)
+          receiveHeaders(con) map (_ add header)
         }
       }
     }

@@ -73,6 +73,12 @@ case class Headers private(data: Map[String, Header]) {
   def overwriteWith(other: Headers): Headers =
     Headers(data ++ other.data)
 
+  def contains(header: Header): Boolean =
+    toList contains header
+
+  def add(header: Header): Headers =
+    Headers(Map(header.name -> header) ++ data)
+
   lazy val toList: List[Header] =
     data.values.toList
 }
@@ -164,7 +170,7 @@ object Status {
 }
 
 /** An HTTP response */
-case class Response(status: Status, headers: List[Header], body: ByteVector) {
+case class Response(status: Status, headers: Headers, body: ByteVector) {
 
   /** Decodes the body as UTF-8 text */
   def text: Option[String] =

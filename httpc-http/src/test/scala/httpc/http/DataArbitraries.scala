@@ -64,6 +64,10 @@ object DataArbitraries {
     (alphaNumStr |@| alphaNumStr) map Header.apply
   }
 
+  implicit val arbHeaders: Arbitrary[Headers] = Arbitrary {
+    arbitrary[List[Header]] map Headers.apply
+  }
+
   implicit val arbStatus: Arbitrary[Status] = Arbitrary {
     Gen.oneOf((100 to 102) ++ (200 to 208) ++ (300 to 308) ++ (400 to 429) ++ (500 to 511)) map Status.apply
   }
@@ -73,6 +77,6 @@ object DataArbitraries {
   }
 
   implicit val arbResponse: Arbitrary[Response] = Arbitrary {
-    (arbitrary[Status] |@| arbitrary[List[Header]] |@| arbitrary[ByteVector]) map Response
+    (arbitrary[Status] |@| arbitrary[Headers] |@| arbitrary[ByteVector]) map Response.apply
   }
 }

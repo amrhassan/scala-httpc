@@ -32,7 +32,7 @@ private [httpc] object ChunkedTransferMode extends TransferMode {
     size <- either(Either.catchOnly[NumberFormatException](Integer.valueOf(sizeHex, 16)).left.map(_ => CorruptedChunkedResponse))
   } yield size
 
-  def fromResponseHeaders(headers: List[Header]): Option[Either[HttpError, TransferMode]] =
+  def fromResponseHeaders(headers: Headers): Option[Either[HttpError, TransferMode]] =
     if (headers.contains(Header.transferEncodingChunked))
       Either.right(ChunkedTransferMode).some
     else None
@@ -40,7 +40,7 @@ private [httpc] object ChunkedTransferMode extends TransferMode {
 
 private [httpc] object TransferMode {
 
-  def fromResponseHeaders(headers: List[Header]): Either[HttpError, TransferMode] = {
+  def fromResponseHeaders(headers: Headers): Either[HttpError, TransferMode] = {
     val modes = ChunkedTransferMode.fromResponseHeaders(headers) orElse FixedLengthTransferMode.fromResponseHeaders(headers)
     modes.getOrElse(Either.right(UnspecifiedTransferMode))
   }
@@ -48,9 +48,9 @@ private [httpc] object TransferMode {
 
 private [httpc] object FixedLengthTransferMode {
 
-  def fromResponseHeaders(headers: List[Header]): Option[Either[HttpError, TransferMode]] =
+  def fromResponseHeaders(headers: Headers): Option[Either[HttpError, TransferMode]] =
     for {
-      header <- headers.find(_.name == HeaderNames.ContentLength)
+      header <- headers.toList.find(_.name == HeaderNames.ContentLength)
       length = Either.catchNonFatal(header.value.toInt).left.map(_ => CorruptedContentLength)
     } yield length.map(FixedLengthTransferMode.apply)
 }
