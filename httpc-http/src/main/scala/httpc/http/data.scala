@@ -162,7 +162,7 @@ object Request {
   }
 }
 
-case class Status(value: Int)
+case class Status(value: Int) extends AnyVal
 
 object Status {
   private [http] def read(bytes: ByteVector): Option[Status] =
