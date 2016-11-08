@@ -10,7 +10,7 @@ Optional support for JSON payloads is available via [Circe](https://github.com/t
 # Quick Usage #
 
 ```sbt
-libraryDependencies ++= Seq("io.github.amrhassan" %% "httpc" % "0.3.0-RC2")
+libraryDependencies ++= Seq("io.github.amrhassan" %% "httpc" % "0.3.0")
 ```
 
 ```scala
