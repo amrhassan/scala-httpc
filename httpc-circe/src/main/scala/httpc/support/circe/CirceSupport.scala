@@ -13,5 +13,5 @@ trait CirceSupport {
   }
 
   implicit val toRequestJson: Entity[Json] =
-    Entity(Header.contentType("application/json"))(json => Bytes.fromUtf8(json.noSpaces))
+    Entity(Header.contentTypeJson)(json => Bytes.fromUtf8(json.noSpaces))
 }

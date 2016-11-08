@@ -47,6 +47,9 @@ trait HeaderConstruction {
   def contentType(value: String): Header =
     Header(HeaderNames.ContentType, value)
 
+  val contentTypeJson: Header =
+    contentType("application/json")
+
   /** Host header */
   def host(hostname: String): Header =
     Header(HeaderNames.Host, hostname)

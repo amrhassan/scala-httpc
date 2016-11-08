@@ -5,6 +5,7 @@ import scalacheck.cats._
 import Gen._
 import Arbitrary._
 import cats.implicits._
+import scodec.bits.ByteVector
 
 object DataArbitraries {
 
@@ -57,5 +58,21 @@ object DataArbitraries {
       (genPathSegments |@| genQuery |@| genFragment) map (_ |+| _ |+| _)
 
     (genScheme |@| genAuth |@| genHost |@| genPort |@| genPath) map (_ |+| _ |+| _ |+| _ |+| _)
+  }
+
+  implicit val arbHeader: Arbitrary[Header] = Arbitrary {
+    (alphaNumStr |@| alphaNumStr) map Header.apply
+  }
+
+  implicit val arbStatus: Arbitrary[Status] = Arbitrary {
+    Gen.oneOf((100 to 102) ++ (200 to 208) ++ (300 to 308) ++ (400 to 429) ++ (500 to 511)) map Status.apply
+  }
+
+  implicit val arbByteVector: Arbitrary[ByteVector] = Arbitrary {
+    arbitrary[Array[Byte]] map ByteVector.view
+  }
+
+  implicit val arbResponse: Arbitrary[Response] = Arbitrary {
+    (arbitrary[Status] |@| arbitrary[List[Header]] |@| arbitrary[ByteVector]) map Response
   }
 }

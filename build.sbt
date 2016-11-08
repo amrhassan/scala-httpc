@@ -68,7 +68,7 @@ val `httpc-http` = project
   .settings(commonSettings:_*)
   .settings(
     name := "httpc-http",
-    libraryDependencies ++= circeTest ++ base64Test
+    libraryDependencies ++= testUsingCirce ++ base64Test
   )
   .dependsOn(`httpc-net`)
 
@@ -76,9 +76,9 @@ val `httpc-circe` = project
   .settings(commonSettings:_*)
   .settings(
     name := "httpc-circe",
-    libraryDependencies ++= circe
+    libraryDependencies ++= circe ++ circeTesting
   )
-  .dependsOn(`httpc-http`)
+  .dependsOn(`httpc-http` % "test->test;compile->compile")
 
 val httpc = project
   .settings(commonSettings:_*)

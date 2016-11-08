@@ -5,8 +5,9 @@ object Dependencies {
 
   val cats = Seq("cats-core", "cats-free") map ("org.typelevel" %% _ % "0.8.0")
 
-  val circe = Seq("circe-core", "circe-parser", "circe-generic") map ("io.circe" %% _ % "0.6.0-RC1")
-  val circeTest = circe map (_ % Test)
+  val circe = Seq("circe-core", "circe-parser", "circe-generic") map circeDep
+  val testUsingCirce = circe map (_ % Test)
+  val circeTesting = Seq("circe-testing") map circeDep map (_ % Test)
 
   val scalaCheck = Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4",
@@ -22,5 +23,8 @@ object Dependencies {
   val simulacrum = Seq("com.github.mpilquist" %% "simulacrum" % "0.10.0")
 
   val scodecBits = Seq("org.scodec" %% "scodec-bits" % "1.1.2")
+
+  def circeDep(name: String) =
+    "io.circe" %% name % "0.6.0-RC1"
 }
 
