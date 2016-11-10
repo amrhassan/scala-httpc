@@ -11,7 +11,7 @@ object Dependencies {
 
   val scalaCheck = Seq(
     "org.scalacheck" %% "scalacheck" % "1.13.4",
-    "io.github.amrhassan" %% "scalacheck-cats" % "0.3.0"
+    "io.github.amrhassan" %% "scalacheck-cats" % "0.3.1"
   ) map (_ % Test)
 
   val enumeratum = Seq("com.beachape" %% "enumeratum" % "1.4.17")
