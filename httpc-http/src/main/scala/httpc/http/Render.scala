@@ -13,10 +13,6 @@ import simulacrum.typeclass
 
 object Render {
 
-  def apply[A](f: A => ByteVector): Render[A] = new Render[A] {
-    def render(a: A): ByteVector = f(a)
-  }
-
   implicit val contraFunctorRender: functor.Contravariant[Render] =
     new Contravariant[Render] {
       def contramap[A, B](fa: Render[A])(f: (B) => A): Render[B] = new Render[B] {

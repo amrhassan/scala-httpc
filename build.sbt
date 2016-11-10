@@ -13,11 +13,10 @@ val commonDeps =
 
 lazy val commonSettings = Seq(
   organization := org,
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.0",
   crossScalaVersions := Seq("2.11.8", "2.12.0"),
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
-  addCompilerPlugin("com.milessabin" % "si2712fix-plugin" % "1.2.0" cross CrossVersion.full),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
   publishArtifact in Test := false,
   publishMavenStyle := true,
@@ -26,6 +25,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-Xfatal-warnings",
     "-Ywarn-unused-import",
+    "-Ypartial-unification",
     "-Xlint",
     "-feature",
     "-language:implicitConversions"
@@ -35,6 +35,7 @@ lazy val commonSettings = Seq(
     "-no-link-warnings" // Suppresses problems with Scaladoc @throws links
   ),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  releaseCrossBuild := true,
   pomExtra := (
     <url>https://amrhassan.github.io/scala-httpc/</url>
       <licenses>

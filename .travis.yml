@@ -1,6 +1,4 @@
 language: scala
-scala:
-   - 2.11.8
 script:
   - sbt clean coverage test coverageReport
 after_success:

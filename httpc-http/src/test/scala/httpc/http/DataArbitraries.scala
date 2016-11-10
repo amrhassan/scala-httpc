@@ -1,7 +1,7 @@
 package httpc.http
 
 import org.scalacheck._
-import scalacheck.cats._
+import org.scalacheck.support.cats._
 import Gen._
 import Arbitrary._
 import cats.implicits._
