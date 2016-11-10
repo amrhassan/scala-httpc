@@ -18,8 +18,6 @@ object Dependencies {
 
   val specs2 = Seq("specs2-core", "specs2-scalacheck") map ("org.specs2" %% _ % "3.8.6" % Test)
 
-  val base64Test = Seq("com.github.marklister" %% "base64" % "0.2.3" % Test)
-
   val simulacrum = Seq("com.github.mpilquist" %% "simulacrum" % "0.10.0")
 
   val scodecBits = Seq("org.scodec" %% "scodec-bits" % "1.1.2")

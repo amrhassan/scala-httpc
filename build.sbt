@@ -69,7 +69,7 @@ val `httpc-http` = project
   .settings(commonSettings:_*)
   .settings(
     name := "httpc-http",
-    libraryDependencies ++= testUsingCirce ++ base64Test
+    libraryDependencies ++= testUsingCirce
   )
   .dependsOn(`httpc-net`)
 
