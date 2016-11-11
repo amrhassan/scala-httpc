@@ -1,7 +1,8 @@
 package httpc.http
 
 import java.nio.ByteBuffer
-import com.github.marklister.base64.Base64
+import java.util.Base64
+
 import httpc._
 import httpc.http.Arbitraries._
 import httpc.net.Bytes
@@ -68,7 +69,7 @@ class HttpSpec extends Specification with ScalaCheck { def is = s2"""
         ByteVector.empty
       else if (data.startsWith("data:application/octet-stream;base64,")) {
         val s = data.split(',')(1)
-        ByteVector(Base64.Decoder(s).toByteArray)
+        ByteVector(Base64.getDecoder.decode(s))
       } else
         Bytes.fromUtf8(data)
   }

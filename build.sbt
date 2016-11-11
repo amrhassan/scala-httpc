@@ -1,8 +1,8 @@
 
 import Dependencies._
 
-val org = "io.github.amrhassan"
-sonatypeProfileName := org
+sonatypeProfileName in ThisBuild := organization.value
+releasePublishArtifactsAction in ThisBuild := PgpKeys.publishSigned.value
 
 val commonDeps =
   cats ++
@@ -12,9 +12,8 @@ val commonDeps =
   simulacrum
 
 lazy val commonSettings = Seq(
-  organization := org,
+  organization := "io.github.amrhassan",
   scalaVersion := "2.12.0",
-  crossScalaVersions := Seq("2.11.8", "2.12.0"),
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
@@ -34,8 +33,6 @@ lazy val commonSettings = Seq(
   scalacOptions in (Compile, doc) ++= Seq(
     "-no-link-warnings" // Suppresses problems with Scaladoc @throws links
   ),
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-  releaseCrossBuild := true,
   pomExtra := (
     <url>https://amrhassan.github.io/scala-httpc/</url>
       <licenses>
