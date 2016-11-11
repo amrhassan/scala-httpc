@@ -1,8 +1,9 @@
 
 import Dependencies._
 
-sonatypeProfileName in ThisBuild := organization.value
-releasePublishArtifactsAction in ThisBuild := PgpKeys.publishSigned.value
+val org = "io.github.amrhassan"
+sonatypeProfileName := org
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
 
 val commonDeps =
   cats ++
@@ -12,7 +13,7 @@ val commonDeps =
   simulacrum
 
 lazy val commonSettings = Seq(
-  organization := "io.github.amrhassan",
+  organization := org,
   scalaVersion := "2.12.0",
   libraryDependencies ++= commonDeps,
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
