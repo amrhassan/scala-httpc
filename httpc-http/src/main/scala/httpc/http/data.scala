@@ -177,7 +177,7 @@ case class Response(status: Status, headers: Headers, body: ByteVector) {
     Either.catchNonFatal(Bytes.toString(body)).toOption
 }
 
-case class Url(protocol: String, auth: Option[String], host: String, port: Option[Port], resource: Resource)
+case class Url(protocol: String, auth: Option[String] = None, host: String, port: Option[Port] = None, resource: Resource)
 
 object Url {
   def parse(url: String): Option[Url] =
