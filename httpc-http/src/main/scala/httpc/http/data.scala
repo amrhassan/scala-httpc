@@ -18,6 +18,7 @@ trait HeaderNames {
   val TransferEncoding = "Transfer-Encoding"
   val CacheControl = "Cache-Control"
   val UserAgent = "User-Agent"
+  val Accept = "Accept"
 }
 
 object HeaderNames extends HeaderNames
@@ -66,6 +67,15 @@ trait HeaderConstruction {
 
   def userAgent(value: String): Header =
     Header(HeaderNames.UserAgent, value)
+
+  def accept(value: String): Header =
+    Header(HeaderNames.Accept, value)
+
+  val acceptJsonApi: Header =
+    accept("application/vnd.api+json")
+
+  val acceptJson: Header =
+    accept("application/json")
 }
 
 case class Headers private(data: Map[String, Header]) {
