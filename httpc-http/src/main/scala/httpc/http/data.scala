@@ -19,6 +19,7 @@ trait HeaderNames {
   val CacheControl = "Cache-Control"
   val UserAgent = "User-Agent"
   val Accept = "Accept"
+  val Authorization = "Authorization"
 }
 
 object HeaderNames extends HeaderNames
@@ -76,6 +77,9 @@ trait HeaderConstruction {
 
   val acceptJson: Header =
     accept("application/json")
+
+  def authorization(value: String): Header =
+    Header(HeaderNames.Authorization, value)
 }
 
 case class Headers private(data: Map[String, Header]) {
@@ -106,6 +110,11 @@ object Headers {
     def combine(x: Headers, y: Headers): Headers = Headers(x.toList |+| y.toList)
   }
 
+  implicit val renderHeaders: Render[Headers] = Render { headers =>
+    val (host, rest) = headers.toList.partition(_.name == HeaderNames.Host)
+    ((host ++ rest) map (_.render |+| newline)).combineAll
+  }
+
   val empty: Headers =
     Headers()
 }
@@ -116,9 +125,7 @@ case class Message(headers: Headers, body: ByteVector)
 object Message {
 
   implicit val renderMessage: Render[Message] = Render { message =>
-    val headers = (message.headers.toList map (_.render |+| newline)).combineAll |+| newline
-    val body = message.body
-    headers |+| body
+    message.headers.render |+| newline |+| message.body
   }
 }
 
